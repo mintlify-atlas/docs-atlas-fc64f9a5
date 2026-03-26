@@ -1,97 +1,75 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Visión por Computador"
+description: "Course materials for the Computer Vision course at PUC, taught by Domingo Mery. Covers computational geometry, deep learning, and AI ethics."
 ---
 
-## Setting up
+Welcome to the documentation site for **Visión por Computador** (IEE3714 / IIC3724), a graduate-level Computer Vision course at the Pontificia Universidad Católica de Chile, taught by [Domingo Mery](https://domingomery.ing.puc.cl).
 
-Get your documentation site up and running in minutes.
+The course takes you from the mathematical foundations of image geometry through modern deep learning architectures, finishing with a critical look at ethics, fairness, and explainability in AI systems. All topics are accompanied by hands-on Python (Google Colab) and MATLAB examples.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+## Where to start
 
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Course overview" icon="book-open" href="/course-overview">
+    Understand the course structure, schedule, and grading.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Bibliography" icon="books" href="/bibliography">
+    Key textbooks and reference materials used throughout the course.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Computational geometry" icon="shapes" href="/geometry/homogeneous-coordinates">
+    Homogeneous coordinates, transformations, calibration, and multi-view geometry.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Deep learning" icon="brain" href="/deep-learning/introduction">
+    CNNs, YOLO, facial analysis, segmentation, GANs, and Transformers.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Course modules
 
-Everything you need to create world-class documentation.
+<CardGroup cols={2}>
+  <Card title="Homogeneous coordinates" icon="vector-square" href="/geometry/homogeneous-coordinates">
+    Points, lines, and planes in projective space.
+  </Card>
+  <Card title="2D & 3D transformations" icon="rotate" href="/geometry/transformations">
+    Euclidean, similarity, affine, and projective transformations.
+  </Card>
+  <Card title="Camera calibration" icon="camera" href="/geometry/camera-calibration">
+    Intrinsic/extrinsic parameters, RANSAC, and least-squares estimation.
+  </Card>
+  <Card title="Epipolar & trifocal geometry" icon="eye" href="/geometry/multiple-view-geometry">
+    Fundamental matrix, 3D reconstruction, and trifocal tensors.
+  </Card>
+  <Card title="CNNs & image classification" icon="layer-group" href="/deep-learning/image-classification-cnn">
+    Convolutional neural networks and transfer learning with PyTorch.
+  </Card>
+  <Card title="Object detection — YOLO" icon="crosshairs" href="/deep-learning/object-detection-yolo">
+    Real-time detection, tracking, and anomaly detection.
+  </Card>
+  <Card title="GANs & Stable Diffusion" icon="wand-magic-sparkles" href="/deep-learning/generative-models">
+    Generative adversarial networks and diffusion-based image synthesis.
+  </Card>
+  <Card title="Ethics & fairness" icon="scale-balanced" href="/ethics/introduction">
+    Bias, explainability, adversarial attacks, and responsible AI.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Getting started
 
-## Need inspiration?
+<Steps>
+  <Step title="Review the course overview">
+    Read the [course overview](/course-overview) to understand the schedule, topics, and expectations.
+  </Step>
+  <Step title="Set up your Python environment">
+    Most hands-on exercises run in Google Colab — no local setup required. Open any Colab link directly from the topic pages.
+  </Step>
+  <Step title="Start with geometry">
+    Begin with [homogeneous coordinates](/geometry/homogeneous-coordinates) to build the mathematical foundation needed for the rest of the course.
+  </Step>
+  <Step title="Explore deep learning">
+    Once comfortable with geometry, move to [deep learning](/deep-learning/introduction) to work with CNNs, YOLO, and Transformers.
+  </Step>
+</Steps>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Note>
+  Recorded lectures from the 2021 edition of the course are linked throughout the materials as supplementary viewing. Look for **Video: Clase grabada** references on each topic page.
+</Note>

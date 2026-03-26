@@ -1,0 +1,113 @@
+---
+title: "Ethics in AI and Computer Vision"
+description: Motivations, challenges, and responsibilities in AI-powered computer vision systems
+---
+
+Computer vision systems are deployed at scale in contexts that directly affect people's lives — from surveillance cameras in public spaces to automated hiring tools that scan faces. As practitioners, understanding the ethical dimensions of these systems is not optional. It is a core professional responsibility.
+
+## Why ethics matters in computer vision
+
+Computer vision enables powerful capabilities: tracking individuals across camera networks, inferring emotion or intent from facial expressions, making split-second decisions in autonomous vehicles. Each of these capabilities carries significant potential for harm if deployed carelessly or maliciously.
+
+Three domains illustrate the stakes most clearly:
+
+**Surveillance.** Face recognition integrated into city-wide camera networks enables mass identification of individuals without their knowledge or consent. Even systems with high aggregate accuracy can misidentify specific populations at much higher rates, leading to wrongful stops, detentions, or worse.
+
+**Facial recognition.** Commercial face recognition systems have been shown to exhibit significant accuracy disparities across demographic groups — particularly for darker-skinned women. Systems trained on non-representative datasets amplify these gaps, and errors in high-stakes applications (law enforcement, border control) carry severe consequences.
+
+**Autonomous systems.** Self-driving vehicles, autonomous drones, and robotic systems must make decisions that affect safety. Questions of accountability — who is responsible when an autonomous system causes harm — remain largely unresolved legally and ethically.
+
+## The good, the bad, and the ugly of AI
+
+Professor Domingo Mery's lecture "Lo Bueno lo Malo y lo Feo de la IA" frames the ethical landscape of AI in three categories:
+
+- **The good:** AI accelerates medical diagnosis, expands access to education, improves road safety, and enables scientific discovery at scales previously impossible.
+- **The bad:** The same capabilities are used for automated discrimination, mass surveillance, disinformation generation, and labor displacement without safety nets.
+- **The ugly:** The harms are not distributed equally. Communities with less political and economic power bear a disproportionate share of AI's negative consequences, while benefits accrue elsewhere.
+
+This framing is a useful starting point: the goal is not to reject AI, but to develop it responsibly — maximizing the good, constraining the bad, and confronting the ugly honestly.
+
+<Note>
+Ethics in AI is not a checklist to be completed before deployment. It is an ongoing process that spans design, data collection, model development, deployment, monitoring, and decommissioning.
+</Note>
+
+## Key challenges
+
+### Privacy
+
+Computer vision systems collect and process biometric data — faces, gaits, body shapes — that are uniquely identifying and, unlike passwords, cannot be changed if compromised. Users frequently do not know they are being observed, let alone that their images are being analyzed by machine learning models.
+
+### Consent
+
+Meaningful consent requires that individuals understand what data is being collected, how it will be used, and with whom it will be shared. In public surveillance contexts, informed consent is effectively impossible to obtain. In commercial contexts, consent is often buried in terms-of-service agreements that no one reads.
+
+### Accountability
+
+When an automated system makes an error that harms someone, who is responsible? The developer? The organization that deployed the system? The operator who acted on its output? Current legal frameworks in most jurisdictions do not provide clear answers, creating a gap between technical capability and legal accountability.
+
+### Dual use
+
+Computer vision technologies developed for beneficial purposes can be repurposed for harmful ones. A person re-identification system built for retail analytics can be repurposed for tracking dissidents. A medical imaging model can be adapted to screen images for law enforcement purposes. The same model architecture, the same weights, different consequences.
+
+## Data protection law: Chilean Ley 19628
+
+Chile's Ley 19628 on the protection of personal data establishes rules for collecting, processing, and storing personal information, including biometric data. Key provisions include:
+
+- Data may only be collected for specific, explicit, and legitimate purposes
+- Individuals have the right to access, correct, and request deletion of their data
+- Sensitive personal data — including biometric identifiers — requires explicit consent for processing
+- Organizations that process personal data bear legal responsibility for its protection
+
+For computer vision practitioners operating in Chile, compliance with Ley 19628 is a legal requirement, not merely a best practice. The law was updated to align more closely with international standards (notably the EU's GDPR), reflecting a global convergence toward stronger data protection frameworks.
+
+## Federated and Swarm Learning as privacy-preserving alternatives
+
+Traditional machine learning requires centralizing training data — images, medical records, behavioral logs — in a single location. This creates large targets for data breaches and concentrates sensitive information with single entities.
+
+**Federated Learning** addresses this by training models across distributed devices or institutions without moving the raw data. Each participant trains a local model on local data; only model updates (gradients) are shared with a central aggregator. The raw data never leaves its origin.
+
+**Swarm Learning** extends this concept further, removing even the central aggregator. Model updates are shared peer-to-peer using blockchain-based coordination, eliminating single points of failure and control.
+
+These approaches enable training on sensitive datasets — medical images, financial records, personal communications — while providing stronger privacy guarantees than centralized approaches. They are particularly relevant for healthcare and cross-institutional research, where data sharing is legally or ethically constrained.
+
+<Note>
+Federated and Swarm Learning reduce privacy risk but do not eliminate it entirely. Gradient updates can still leak information about training data under certain attack conditions. Privacy-preserving ML is an active research area.
+</Note>
+
+## Lecture videos
+
+<CardGroup cols={2}>
+  <Card
+    title="Ethics in AI: A Challenging Task"
+    icon="play"
+    href="https://youtu.be/rMU9pJCyJYY"
+  >
+    Ricardo Baeza-Yates on the challenges of ethical AI development, covering bias, fairness, and accountability in deployed systems.
+  </Card>
+  <Card
+    title="Adversarial Attacks"
+    icon="play"
+    href="https://youtu.be/kxyacmVSGlI"
+  >
+    Introduction to adversarial examples — carefully crafted inputs that cause computer vision models to fail in unexpected and sometimes dangerous ways.
+  </Card>
+</CardGroup>
+
+## Continue learning
+
+<CardGroup cols={2}>
+  <Card
+    title="Fairness and Bias in AI"
+    icon="scale-balanced"
+    href="/ethics/fairness-bias"
+  >
+    Understanding algorithmic bias, fairness definitions, measurement methods, and mitigation strategies for computer vision systems.
+  </Card>
+  <Card
+    title="Explainability and Interpretability"
+    icon="magnifying-glass"
+    href="/ethics/explainability"
+  >
+    Methods for explaining AI model decisions, including saliency maps, GradCAM, and the MinPlus algorithm for black-box facial analysis.
+  </Card>
+</CardGroup>

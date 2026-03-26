@@ -1,0 +1,164 @@
+---
+title: "Practice Exercises"
+description: "Hands-on in-class exercises with Python (Colab) for each course topic, from geometry to deep learning."
+---
+
+Each class session includes a structured in-class exercise (labeled **E01–E11**) that you complete in Google Colab. The exercises are designed to reinforce the theoretical concepts covered in lectures through direct implementation.
+
+Exercises are split into two groups: **geometry** (E01–E04), which build your understanding of projective geometry and camera models, and **deep learning** (E05–E11), which take you through CNNs, object detection, segmentation, generative models, Transformers, and ethics.
+
+<Tip>
+  All Colab notebooks can be run without any local setup. Open the link, make a copy to your own Google Drive (**File → Save a copy in Drive**), and run the cells top to bottom. Make sure your runtime is set to GPU for deep learning exercises.
+</Tip>
+
+## Geometry exercises (E01–E04)
+
+These four exercises cover the core topics of Chapter 2: projective representations, homographies, camera calibration, and epipolar geometry.
+
+<CardGroup cols={2}>
+  <Card
+    title="E01 — Where does John Lennon look?"
+    icon="eye"
+    href="https://colab.research.google.com/drive/1knJgA6L62IgbMOsqjhbtHxLOsNHICnJn"
+  >
+    Apply homogeneous coordinates and line intersection to determine gaze direction in an image. Topic: homogeneous coordinates.
+  </Card>
+  <Card
+    title="E01 — Solution"
+    icon="circle-check"
+    href="https://colab.research.google.com/drive/1sL1eKDIR5CBX5RNqwA4BiVN4c8WtKNfD"
+  >
+    Reference solution for the John Lennon exercise.
+  </Card>
+  <Card
+    title="E02 — Clock rectification"
+    icon="clock"
+    href="https://colab.research.google.com/drive/1w0Q0Rki1S4F9sYcBnmGhW-et7FEBJBLF"
+  >
+    Compute and apply a homography to rectify a perspective-distorted image of a clock face. Topic: homographies.
+  </Card>
+  <Card
+    title="E02 — Solution"
+    icon="circle-check"
+    href="https://colab.research.google.com/drive/18kVSEnN9SSNCfRLzbJrj61L_JEHV4iyi"
+  >
+    Reference solution for the clock rectification exercise.
+  </Card>
+  <Card
+    title="E03 — Camera calibration"
+    icon="camera"
+    href="https://colab.research.google.com/drive/1ecSa61hoWgsgfbIyISshOmi5tKI3oZ0E"
+  >
+    Calibrate a real camera using a checkerboard pattern and recover intrinsic and extrinsic parameters. Topic: camera calibration.
+  </Card>
+  <Card
+    title="E04 — Epipolar geometry"
+    icon="arrows-left-right"
+    href="https://github.com/domingomery/vision/tree/master/clases/Cap02_Geometria"
+  >
+    Compute the fundamental matrix and visualize epipolar lines between a stereo image pair. Topic: epipolar geometry.
+  </Card>
+</CardGroup>
+
+## Deep learning exercises (E05–E11)
+
+These exercises cover Chapter 3 (deep learning architectures) and Chapter 4 (ethics).
+
+<CardGroup cols={2}>
+  <Card
+    title="E05 — CNN training"
+    icon="brain"
+    href="https://colab.research.google.com/drive/1e7ENVJPpQsIX1_wrplXjzLx_KVdGmhDz"
+  >
+    Train a convolutional neural network from scratch on an image classification dataset using PyTorch. Topic: CNNs.
+  </Card>
+  <Card
+    title="E06 — YOLO mask detection"
+    icon="crosshairs"
+    href="https://github.com/domingomery/vision/tree/master/clases/Cap03_DeepLearning"
+  >
+    Fine-tune a YOLO model to detect face masks in images. Topic: object detection.
+  </Card>
+  <Card
+    title="E07 — Facial analysis"
+    icon="face-smile"
+    href="https://colab.research.google.com/drive/1oDR4I237g4QoMt80x-Rv7pvcRJAa5jaz"
+  >
+    Implement facial recognition and attribute analysis using pretrained deep learning models. Topic: facial analysis.
+  </Card>
+  <Card
+    title="E08 — UNet segmentation"
+    icon="draw-polygon"
+    href="https://colab.research.google.com/drive/1WS0nMoBMpKlzJj81PMnwAW8124-1HVQB"
+  >
+    Train a UNet architecture to perform pixel-wise semantic segmentation on an image dataset. Topic: segmentation.
+  </Card>
+  <Card
+    title="E09 — GAN image generation"
+    icon="wand-magic-sparkles"
+    href="https://colab.research.google.com/drive/1MFV1VG_6P9eDOH7zG67A2kCxdeXZHCxB"
+  >
+    Implement and train a Generative Adversarial Network to synthesize new images. Topic: GANs.
+  </Card>
+  <Card
+    title="E10 — Transformers"
+    icon="network-wired"
+    href="https://colab.research.google.com/drive/1ZYVRAl2lEGapBGrKa9BibQyYI4TpP9yH"
+  >
+    Apply Vision Transformers (ViT) using HuggingFace for image understanding tasks. Topic: Transformers.
+  </Card>
+  <Card
+    title="E11 — Ethics quiz"
+    icon="scale-balanced"
+    href="https://cursos.canvas.uc.cl/courses/92380/assignments#"
+  >
+    A short quiz on AI ethics, fairness, bias, and explainability. Completed through Canvas. Topic: ethics.
+  </Card>
+</CardGroup>
+
+## Full exercise list
+
+| # | Topic | Exercise | Solution |
+|---|-------|----------|----------|
+| E01 | Homogeneous coordinates | [Where does John Lennon look?](https://colab.research.google.com/drive/1knJgA6L62IgbMOsqjhbtHxLOsNHICnJn) | [Solution](https://colab.research.google.com/drive/1sL1eKDIR5CBX5RNqwA4BiVN4c8WtKNfD) |
+| E02 | Homographies | [Clock rectification](https://colab.research.google.com/drive/1w0Q0Rki1S4F9sYcBnmGhW-et7FEBJBLF) | [Solution](https://colab.research.google.com/drive/18kVSEnN9SSNCfRLzbJrj61L_JEHV4iyi) |
+| E03 | Camera calibration | [Camera calibration for a project](https://colab.research.google.com/drive/1ecSa61hoWgsgfbIyISshOmi5tKI3oZ0E) | — |
+| E04 | Epipolar geometry | [Course repo](https://github.com/domingomery/vision/tree/master/clases/Cap02_Geometria) | — |
+| E05 | CNN training | [CNN training](https://colab.research.google.com/drive/1e7ENVJPpQsIX1_wrplXjzLx_KVdGmhDz) | — |
+| E06 | Object detection — YOLO | [Course repo](https://github.com/domingomery/vision/tree/master/clases/Cap03_DeepLearning) | — |
+| E07 | Facial analysis | [Facial analysis](https://colab.research.google.com/drive/1oDR4I237g4QoMt80x-Rv7pvcRJAa5jaz) | — |
+| E08 | Segmentation — UNet | [UNet segmentation](https://colab.research.google.com/drive/1WS0nMoBMpKlzJj81PMnwAW8124-1HVQB) | — |
+| E09 | Generative models — GANs | [GAN image generation](https://colab.research.google.com/drive/1MFV1VG_6P9eDOH7zG67A2kCxdeXZHCxB) | — |
+| E10 | Transformers | [Transformers exercise](https://colab.research.google.com/drive/1ZYVRAl2lEGapBGrKa9BibQyYI4TpP9yH) | — |
+| E11 | Ethics | Quiz on Canvas | — |
+
+## Working with Google Colab
+
+<Tip>
+  Follow these practices to get the most out of the Colab exercises:
+
+  - **Save your own copy**: Go to **File → Save a copy in Drive** before editing any notebook. The shared links are read-only.
+  - **Enable GPU**: For deep learning exercises (E05–E10), switch to a GPU runtime: **Runtime → Change runtime type → T4 GPU**.
+  - **Run cells in order**: Always run cells from top to bottom. Skipping cells will cause `NameError` or missing imports.
+  - **Check package versions**: Some notebooks install specific package versions using `!pip install`. Run these cells even if the package appears to already be installed.
+  - **Runtime disconnects**: Colab sessions disconnect after idle time. If you lose progress, re-run all cells from the top.
+</Tip>
+
+## MATLAB examples
+
+Several geometry topics also include MATLAB examples hosted on GitHub. These are especially useful for visualizing 3D transformations interactively.
+
+You can browse all MATLAB files directly in the course repository:
+
+- [Geometry MATLAB examples](https://github.com/domingomery/vision/tree/master/clases/Cap02_Geometria/matlab) — includes 3D pyramid, perspective GUI, and epipolar geometry demos.
+
+To run the perspective GUI (`CV02_Perspective.m`), download the following files to the same directory before running MATLAB:
+
+```text
+CV02_Perspective.m
+CV02_Perspective.fig
+CV02_experspec.m
+CV02_meshplot.m
+meshpoints.mat
+perspecdata.mat
+```

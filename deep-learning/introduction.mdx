@@ -1,0 +1,123 @@
+---
+title: "Introduction to Deep Learning"
+description: Foundations of deep learning for computer vision
+---
+
+Deep learning has transformed computer vision over the past decade, enabling machines to surpass human-level accuracy on tasks like image classification, face recognition, and object detection. This chapter covers the core concepts and tools you need to apply deep learning to vision problems.
+
+## What is deep learning?
+
+Deep learning is a subfield of machine learning that uses **multi-layer neural networks** to learn hierarchical representations directly from raw data. Rather than manually engineering features (edges, textures, shapes), a deep network learns them automatically during training.
+
+In computer vision, this matters enormously:
+
+- Traditional pipelines relied on hand-crafted descriptors (SIFT, HOG, LBP).
+- Deep networks learn task-specific features end-to-end, from pixels to predictions.
+- With enough data and compute, deep models consistently outperform classical methods.
+
+## Neural network basics
+
+### Layers and activations
+
+A neural network is a composition of **layers**, each performing an affine transformation followed by a non-linear **activation function**:
+
+$$\mathbf{h} = f(W\mathbf{x} + \mathbf{b})$$
+
+Common activation functions:
+
+| Activation | Formula | Use case |
+|---|---|---|
+| ReLU | $\max(0, x)$ | Hidden layers (default choice) |
+| Sigmoid | $\sigma(x) = 1/(1+e^{-x})$ | Binary outputs |
+| Softmax | $e^{x_i}/\sum_j e^{x_j}$ | Multi-class classification |
+| Tanh | $(e^x - e^{-x})/(e^x + e^{-x})$ | Hidden layers, GANs |
+
+### Backpropagation
+
+Training minimizes a **loss function** $\mathcal{L}$ by computing gradients via the chain rule and updating weights with gradient descent:
+
+$$W \leftarrow W - \eta \frac{\partial \mathcal{L}}{\partial W}$$
+
+where $\eta$ is the learning rate. Modern optimizers like Adam adapt the learning rate per parameter.
+
+### Overfitting and regularization
+
+- **Dropout**: randomly zero out activations during training.
+- **Batch normalization**: normalize layer inputs to stabilize training.
+- **Data augmentation**: artificially expand the training set with transforms.
+- **Weight decay** (L2 regularization): penalize large weights.
+
+## Course deep learning roadmap
+
+This chapter follows a natural progression from the simplest deep learning tasks to the most advanced:
+
+1. **Image classification with CNNs** — the foundation. Learn convolutions, pooling, transfer learning.
+2. **Object detection with YOLO** — locate and classify multiple objects in a scene.
+3. **Facial analysis** — detection, recognition, and social attribute estimation.
+4. **Segmentation with UNet** — pixel-level labeling using encoder-decoder networks.
+5. **Generative models** — GANs and diffusion models for image synthesis.
+6. **Vision Transformers** — attention-based architectures and multimodal models.
+
+## Key frameworks
+
+### PyTorch (primary)
+
+PyTorch is the primary framework used in this course. It provides dynamic computation graphs, an intuitive Python API, and excellent GPU support.
+
+```python
+import torch
+import torch.nn as nn
+
+# A simple two-layer network
+model = nn.Sequential(
+    nn.Linear(784, 256),
+    nn.ReLU(),
+    nn.Linear(256, 10)
+)
+
+# Forward pass
+x = torch.randn(32, 784)  # batch of 32
+logits = model(x)         # shape: (32, 10)
+```
+
+### TensorFlow / Keras
+
+TensorFlow with the Keras API is a popular alternative, especially in production deployments. The course uses PyTorch, but many pretrained models and notebooks are available in both frameworks.
+
+## Supplementary resources
+
+<Note>
+This chapter builds on neural network fundamentals from the Patterns Recognition course. Review those notes before starting if you are new to neural networks.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Neural Network Notes (Patrones)" icon="book" href="https://github.com/domingomery/patrones?tab=readme-ov-file#clase-20-ma-27-may-2025">
+    Supplementary notes on neural networks from the patterns course — essential background reading.
+  </Card>
+  <Card title="Video: Introduction to Deep Learning" icon="play" href="https://youtu.be/tRQfQln8ZXQ">
+    Recorded lecture (2021) covering deep learning foundations for computer vision.
+  </Card>
+</CardGroup>
+
+## Sub-topics in this chapter
+
+<CardGroup cols={2}>
+  <Card title="Image Classification with CNNs" icon="image" href="/deep-learning/image-classification-cnn">
+    Convolutional architectures, transfer learning, and PyTorch training loops.
+  </Card>
+  <Card title="Object Detection with YOLO" icon="crosshair" href="/deep-learning/object-detection-yolo">
+    Real-time detection, tracking, and anomaly detection.
+  </Card>
+  <Card title="Facial Analysis" icon="user" href="/deep-learning/facial-analysis">
+    Face detection, recognition with ArcFace/AdaFace, and social attribute estimation.
+  </Card>
+  <Card title="Image Segmentation with UNet" icon="layers" href="/deep-learning/segmentation-unet">
+    Semantic and instance segmentation using encoder-decoder architectures.
+  </Card>
+  <Card title="Generative Models" icon="sparkles" href="/deep-learning/generative-models">
+    GANs, DCGAN, and diffusion-based image synthesis with Stable Diffusion.
+  </Card>
+  <Card title="Vision Transformers" icon="cpu" href="/deep-learning/transformers">
+    Self-attention, ViT, CLIP, and HuggingFace models for vision tasks.
+  </Card>
+</CardGroup>

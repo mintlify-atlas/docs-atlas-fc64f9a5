@@ -1,0 +1,155 @@
+---
+title: "Explainability and Interpretability"
+description: Methods for explaining AI model decisions, including saliency maps and the MinPlus algorithm
+---
+
+Modern deep learning models for computer vision routinely achieve or surpass human-level performance on benchmark tasks. But high accuracy is not sufficient for responsible deployment. When a model makes a consequential decision — denying a loan, flagging an anomaly in a medical scan, identifying a suspect — the ability to understand and explain that decision matters independently of whether it is correct.
+
+## Why explainability matters
+
+### Trust and human oversight
+
+Operators and end-users who cannot inspect model reasoning have no principled basis for deciding when to trust the model's output and when to override it. Explainability enables informed human oversight rather than blind trust or blanket rejection.
+
+### Auditing and debugging
+
+Explanations reveal whether a model is using the right features for the right reasons. A skin lesion classifier that achieves high accuracy partly because bandages in training images correlate with melanoma diagnoses is not a reliable clinical tool — but this cannot be discovered without inspecting which image regions drive its decisions.
+
+### Regulatory compliance
+
+The EU's General Data Protection Regulation (GDPR) establishes a right to explanation for automated decisions that significantly affect individuals. Similar requirements are emerging in other jurisdictions. In regulated domains — healthcare, finance, criminal justice — explainability is increasingly a legal requirement, not an optional feature.
+
+<Note>
+Explainability and interpretability are related but distinct concepts. **Interpretability** refers to the degree to which a human can understand the mechanism by which a model makes decisions (often a property of the model architecture itself). **Explainability** refers to the ability to produce post-hoc explanations of specific decisions. A linear model is inherently interpretable; a deep network is not, but it can still be made explainable through additional methods.
+</Note>
+
+## Types of explanations
+
+### Local vs. global
+
+**Local explanations** explain a single prediction: why did the model produce this output for this specific input? Saliency maps are a common form of local explanation — they highlight which regions of an image contributed most to a particular decision.
+
+**Global explanations** characterize the model's overall behavior: which features does it rely on in general? How does it partition the input space? Global explanations are harder to produce for deep networks but provide a more complete picture of model behavior and potential failure modes.
+
+### Model-specific vs. model-agnostic
+
+**Model-specific** explanation methods exploit the internal structure of a particular architecture. GradCAM, for example, uses the gradients flowing through the final convolutional layer — it works for CNNs but cannot be applied to a random forest.
+
+**Model-agnostic** methods treat the model as a black box and probe it through carefully chosen inputs and observations of outputs. LIME and SHAP are widely used model-agnostic methods. The MinPlus algorithm, discussed below, is a model-agnostic method designed specifically for facial analysis.
+
+## Saliency maps: gradient-based methods
+
+Saliency maps produce pixel-level importance scores indicating which parts of an input image most influenced the model's output. Several gradient-based methods have become standard.
+
+### Vanilla gradients
+
+The simplest approach: compute the gradient of the output with respect to the input image. High-magnitude gradients indicate that small changes in those pixels would strongly affect the output. The result is noisy in practice but provides a useful baseline.
+
+### GradCAM
+
+Gradient-weighted Class Activation Mapping (Selvaraju et al., 2017) produces coarse localization maps indicating which regions of the image are most important for a specific class prediction.
+
+GradCAM computes the gradient of the class score with respect to the activations of the final convolutional layer, then weights the activation maps by their average gradient and applies a ReLU. The result is upsampled to the input resolution and overlaid on the original image.
+
+GradCAM is widely used because it is computationally inexpensive and produces visually interpretable results. Its resolution is limited by the spatial resolution of the final convolutional layer.
+
+### Integrated Gradients
+
+Integrated Gradients (Sundararajan et al., 2017) addresses a limitation of vanilla gradients: saturated neurons produce near-zero gradients even for pixels that are causally important for the prediction.
+
+The method integrates gradients along a straight-line path from a baseline input (typically a black image) to the actual input. This satisfies two desirable axioms: **sensitivity** (if a feature affects the prediction, it receives nonzero attribution) and **implementation invariance** (attributions depend only on the function computed, not the implementation).
+
+<Note>
+Saliency maps show correlation, not causation. A region highlighted by GradCAM is one the model attends to — it is not necessarily the reason the prediction is correct, and it does not guarantee the model is using that region appropriately.
+</Note>
+
+## The MinPlus algorithm
+
+MinPlus is a model-agnostic, black-box explanation method developed specifically for facial analysis systems. It was published at the CVPR 2022 Biometrics Workshop.
+
+**Core idea:** Instead of asking "which pixels influenced the prediction?", MinPlus asks two complementary questions:
+- What is the minimal set of facial regions that is **sufficient** to cause the current decision? (Min+)
+- What is the minimal set of facial regions whose **removal** would prevent the current decision? (Min-)
+
+This framing produces explanations that are both actionable and interpretable: they identify specific facial segments (eyes, nose, mouth, forehead, cheeks) rather than pixel-level heatmaps.
+
+### How MinPlus works
+
+<Steps>
+  <Step title="Segment the face">
+    The input face image is divided into a fixed set of non-overlapping facial regions — typically using a face parsing model that segments regions such as eyes, eyebrows, nose, mouth, chin, forehead, and cheeks.
+  </Step>
+
+  <Step title="Define the search space">
+    Each subset of facial regions defines a masked image: segments in the subset are kept, all others are replaced with a neutral value (e.g., mean pixel value or Gaussian blur). With `n` facial segments, there are `2^n` possible subsets.
+  </Step>
+
+  <Step title="Query the black-box model">
+    For each masked image, query the target model (face recognition system, attribute classifier, etc.) to obtain a prediction. The model is treated as a pure black box — no access to weights or gradients is required.
+  </Step>
+
+  <Step title="Find the minimal sufficient set (Min+)">
+    Search for the smallest subset of facial regions such that the model's prediction on the masked image matches its prediction on the full face. This is the minimal set of regions that **causes** the decision. A smaller Min+ set indicates a more focused, interpretable explanation.
+  </Step>
+
+  <Step title="Find the minimal necessary set (Min-)">
+    Search for the smallest subset of facial regions whose removal changes the model's decision. This is the minimal set of regions that the model **requires** to maintain its prediction. If removing a single region (e.g., the eyes) changes the prediction, that region is necessary.
+  </Step>
+
+  <Step title="Interpret and visualize">
+    The Min+ set indicates which regions are sufficient for the decision; the Min- set indicates which regions are necessary. Together they characterize the model's reliance on different facial features for a given input. Results are visualized by highlighting the identified regions on the original face image.
+  </Step>
+</Steps>
+
+<Note>
+MinPlus was demonstrated on face recognition, age estimation, and gender classification tasks in the original CVPR 2022W paper. Because it is model-agnostic, it can be applied to any facial analysis system without modification — including proprietary black-box APIs.
+</Note>
+
+### Resources
+
+<CardGroup cols={2}>
+  <Card
+    title="MinPlus paper (CVPR 2022W)"
+    icon="file"
+    href="https://openaccess.thecvf.com/content/CVPR2022W/Biometrics/papers/Mery_True_Black-Box_Explanation_in_Facial_Analysis_CVPRW_2022_paper.pdf"
+  >
+    Mery et al., "True Black-Box Explanation in Facial Analysis". CVPR 2022 Biometrics Workshop. Full paper with method, experiments, and results.
+  </Card>
+  <Card
+    title="MinPlus Python implementation (Colab)"
+    icon="code"
+    href="https://colab.research.google.com/drive/1tDicgSXk0iEnsTA208Od4j9WUnxSFATO"
+  >
+    Interactive Python notebook implementing MinPlus. Run the algorithm on example faces and visualize the Min+ and Min- explanations.
+  </Card>
+</CardGroup>
+
+## Good practices for responsible AI deployment
+
+Explainability methods are tools, not solutions. Responsible deployment requires integrating them into a broader set of practices:
+
+**Establish an explanation baseline before deployment.** Run saliency analysis and model-agnostic probing on a representative test set. Document which features the model uses and verify they are appropriate for the task. Unexpected feature reliance is a red flag.
+
+**Include explanations in human review workflows.** For high-stakes decisions, present explanations alongside predictions to human reviewers. Design the review interface to make it easy for reviewers to override predictions and document disagreements.
+
+**Monitor explanations over time.** Model behavior can shift as input distributions change. Explanations that looked reasonable at deployment may become inappropriate as the world changes. Include explanation monitoring in production ML pipelines.
+
+**Be transparent about limitations.** Saliency maps are approximate. Model-agnostic methods make assumptions about how the model responds to masked inputs that may not hold for all architectures. Communicate these limitations to users of explanation outputs.
+
+**Document explanation methodology.** Model cards and datasheets should include the explanation methods used, what they showed, and what follow-up actions were taken. This creates an auditable record.
+
+<Note>
+Explainability is not a substitute for fairness analysis. A model can produce plausible-looking explanations while still exhibiting systematic bias. Both are necessary — explanations show what the model uses; fairness analysis shows whether those uses produce equitable outcomes across groups.
+</Note>
+
+## Lecture video
+
+<CardGroup cols={1}>
+  <Card
+    title="Explainability (class lecture, 2021)"
+    icon="play"
+    href="https://youtu.be/skhnN2DJ7Xs"
+  >
+    Recorded class lecture on explainability methods for computer vision: gradient-based saliency, LIME, SHAP, and the MinPlus algorithm. Includes worked examples and discussion of practical considerations.
+  </Card>
+</CardGroup>

@@ -1,0 +1,157 @@
+---
+title: "Vision Transformers"
+description: Attention mechanisms, ViT, and multimodal vision-language models
+---
+
+Transformers, originally developed for NLP, have reshaped computer vision. The Vision Transformer (ViT) treats an image as a sequence of patches and processes them with standard self-attention, rivaling and often exceeding CNN performance on large-scale benchmarks.
+
+## Self-attention mechanism
+
+The core of the transformer is the **scaled dot-product attention** operation:
+
+$$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right) V$$
+
+where $Q$ (queries), $K$ (keys), and $V$ (values) are linear projections of the input sequence. The $\sqrt{d_k}$ scaling prevents dot products from growing large in magnitude and saturating the softmax.
+
+**Multi-head attention** runs $h$ independent attention functions in parallel and concatenates the outputs:
+
+$$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h) W^O$$
+
+This lets the model jointly attend to information from different representation subspaces.
+
+### Transformer encoder block
+
+Each encoder layer consists of:
+1. Multi-head self-attention
+2. Add & LayerNorm (residual connection)
+3. Feed-forward network (two linear layers with GELU)
+4. Add & LayerNorm
+
+## Vision Transformer (ViT)
+
+ViT adapts the transformer encoder to images through three steps:
+
+<Steps>
+  <Step title="Patchify">
+    Divide the $H \times W$ image into non-overlapping patches of size $P \times P$. This produces $N = HW / P^2$ patches. Standard ViT-B/16 uses $P=16$ on $224 \times 224$ images, giving $N = 196$ patches.
+  </Step>
+  <Step title="Embed">
+    Flatten each patch to a vector and project it linearly to dimension $D$. Prepend a learnable `[CLS]` token whose final representation is used for classification. Add **positional embeddings** (learned 1D or 2D) to preserve spatial information.
+
+    $$\mathbf{z}_0 = [\mathbf{x}_{\text{cls}}; \mathbf{x}_p^1 E; \mathbf{x}_p^2 E; \ldots; \mathbf{x}_p^N E] + \mathbf{E}_{\text{pos}}$$
+  </Step>
+  <Step title="Encode">
+    Pass the token sequence through $L$ transformer encoder layers. Classify using the `[CLS]` token output through an MLP head:
+
+    $$y = \text{MLP}(\mathbf{z}_L^0)$$
+  </Step>
+</Steps>
+
+<Note>
+ViT requires large training datasets (JFT-300M, ImageNet-21k) to outperform CNNs. On smaller datasets, convolutional inductive biases (translation equivariance, locality) give CNNs an advantage. Hybrid models combine CNN feature extractors with transformer encoders.
+</Note>
+
+## ViT inference with HuggingFace
+
+```python
+from transformers import ViTForImageClassification, ViTFeatureExtractor
+import torch
+from PIL import Image
+
+feature_extractor = ViTFeatureExtractor.from_pretrained('google/vit-base-patch16-224')
+model = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
+
+image = Image.open('image.jpg')
+inputs = feature_extractor(images=image, return_tensors="pt")
+outputs = model(**inputs)
+logits = outputs.logits
+predicted_class = logits.argmax(-1).item()
+print(f"Predicted class: {model.config.id2label[predicted_class]}")
+```
+
+## CLIP: contrastive image-text pretraining
+
+CLIP (Contrastive Language-Image Pretraining, OpenAI 2021) trains an image encoder and a text encoder jointly on 400 million (image, text) pairs from the internet. The objective aligns matching pairs close together and pushes non-matching pairs apart in a shared embedding space.
+
+### Training objective
+
+For a batch of $N$ (image, text) pairs, CLIP maximizes the cosine similarity of the $N$ correct pairs while minimizing similarity for the $N^2 - N$ incorrect pairs:
+
+$$\mathcal{L}_{\text{CLIP}} = -\frac{1}{2N} \sum_{i=1}^{N} \left[ \log \frac{e^{\mathbf{f}_i \cdot \mathbf{g}_i / \tau}}{\sum_j e^{\mathbf{f}_i \cdot \mathbf{g}_j / \tau}} + \log \frac{e^{\mathbf{f}_i \cdot \mathbf{g}_i / \tau}}{\sum_j e^{\mathbf{f}_j \cdot \mathbf{g}_i / \tau}} \right]$$
+
+where $\mathbf{f}_i$ and $\mathbf{g}_i$ are the $\ell_2$-normalized image and text embeddings, and $\tau$ is a learned temperature.
+
+### Zero-shot classification with CLIP
+
+```python
+import clip
+import torch
+from PIL import Image
+
+model, preprocess = clip.load("ViT-B/32")
+
+image   = preprocess(Image.open("cat.jpg")).unsqueeze(0)
+labels  = ["a photo of a cat", "a photo of a dog", "a photo of a bird"]
+tokens  = clip.tokenize(labels)
+
+with torch.no_grad():
+    image_features = model.encode_image(image)
+    text_features  = model.encode_text(tokens)
+    logits, _      = model(image, tokens)
+    probs          = logits.softmax(dim=-1)
+
+for label, prob in zip(labels, probs[0]):
+    print(f"{label}: {prob:.2%}")
+```
+
+## Stable Diffusion
+
+Stable Diffusion combines three components:
+
+| Component | Role |
+|---|---|
+| **CLIP text encoder** | Encodes the text prompt to a conditioning vector |
+| **UNet denoiser** | Predicts noise at each diffusion step, conditioned on the text embedding |
+| **VAE decoder** | Decodes the denoised latent to a full-resolution image |
+
+The conditioning is injected via **cross-attention**: the UNet queries attend to the text token sequence as keys and values.
+
+## HuggingFace Transformers for vision
+
+The `transformers` library provides pretrained ViT, Swin Transformer, CLIP, and many other vision models with a unified API:
+
+```python
+from transformers import AutoFeatureExtractor, AutoModelForImageClassification
+import torch
+from PIL import Image
+
+# Works for ViT, Swin, BEiT, DeiT, ConvNeXT, etc.
+extractor = AutoFeatureExtractor.from_pretrained('microsoft/swin-base-patch4-window7-224')
+model     = AutoModelForImageClassification.from_pretrained('microsoft/swin-base-patch4-window7-224')
+
+image  = Image.open('image.jpg')
+inputs = extractor(images=image, return_tensors='pt')
+
+with torch.no_grad():
+    outputs = model(**inputs)
+
+pred = outputs.logits.argmax(-1).item()
+print(model.config.id2label[pred])
+```
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card title="HuggingFace Transformers Notebook" icon="file" href="https://drive.google.com/file/d/1dKyjqNNgulTdObwSxyXJpaLq1RCZ-SrZ/view">
+    Course notebook covering vision transformers with the HuggingFace ecosystem.
+  </Card>
+  <Card title="Exercise E10: Transformers" icon="flask" href="https://colab.research.google.com/drive/1ZYVRAl2lEGapBGrKa9BibQyYI4TpP9yH">
+    Hands-on transformer exercise using ViT and CLIP models.
+  </Card>
+  <Card title="Video: Transformers from Scratch" icon="play" href="https://youtu.be/bCz4OMemCcA">
+    In-depth tutorial building transformers from scratch by Umar Jamil.
+  </Card>
+  <Card title="Diffusion Models Blog" icon="book" href="https://www.superannotate.com/blog/diffusion-models">
+    Accessible introduction to diffusion models including DDPM and Stable Diffusion.
+  </Card>
+</CardGroup>

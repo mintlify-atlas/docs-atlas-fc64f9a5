@@ -1,0 +1,228 @@
+---
+title: "Multiple View Geometry"
+description: "Epipolar geometry, fundamental matrix, essential matrix, and 3D reconstruction from two or three views."
+---
+
+When a 3D scene is observed from multiple cameras (or from a single moving camera), geometric constraints link the corresponding image points across views. Exploiting these constraints is the basis of **stereo vision**, **structure from motion**, and **multi-view 3D reconstruction**.
+
+## Epipolar geometry
+
+Consider two cameras with centres $\mathbf{C}_1$ and $\mathbf{C}_2$ observing a 3D point $\mathbf{M}$. The three points $\mathbf{C}_1$, $\mathbf{C}_2$, and $\mathbf{M}$ define the **epipolar plane**. Its intersections with the two image planes are the **epipolar lines** $\ell_1$ and $\ell_2$.
+
+**Key insight:** given a point $\mathbf{m}_1$ in image 1, its corresponding point $\mathbf{m}_2$ in image 2 must lie on the epipolar line $\ell_2 = F\,\mathbf{m}_1$. This reduces the correspondence search from 2D to 1D.
+
+### Epipoles
+
+The **epipole** $\mathbf{e}_i$ is the projection of one camera centre into the other image:
+- $\mathbf{e}_2 = P_2\,\mathbf{C}_1$ — projection of $\mathbf{C}_1$ into camera 2
+- $\mathbf{e}_1 = P_1\,\mathbf{C}_2$ — projection of $\mathbf{C}_2$ into camera 1
+
+All epipolar lines in image 2 pass through $\mathbf{e}_2$, and all epipolar lines in image 1 pass through $\mathbf{e}_1$.
+
+## Fundamental matrix $F$
+
+The **fundamental matrix** $F$ is the $3\times 3$ matrix that encodes the epipolar geometry between two uncalibrated cameras:
+
+$$
+\mathbf{m}_2^\top F\,\mathbf{m}_1 = 0 \quad \forall \text{ corresponding pairs } (\mathbf{m}_1, \mathbf{m}_2)
+$$
+
+Properties:
+- $F$ has rank 2 (singular matrix), 7 degrees of freedom (up to scale).
+- Epipolar lines: $\ell_2 = F\,\mathbf{m}_1$ and $\ell_1 = F^\top\,\mathbf{m}_2$.
+- Epipoles satisfy $F\,\mathbf{e}_1 = \mathbf{0}$ and $F^\top\,\mathbf{e}_2 = \mathbf{0}$.
+
+### 8-point algorithm
+
+Each correspondence $\mathbf{m}_1^{(i)} \leftrightarrow \mathbf{m}_2^{(i)}$ gives one linear equation in the 9 entries of $F$. With 8 or more correspondences:
+
+$$
+A\,\mathbf{f} = \mathbf{0}, \qquad \mathbf{f} = \text{vec}(F)
+$$
+
+Solve via SVD; then enforce rank-2 by zeroing the smallest singular value of the $3\times 3$ result.
+
+## Essential matrix $E$
+
+For **calibrated cameras** (intrinsic matrices $K_1$, $K_2$ known), the **essential matrix** $E$ relates normalised image coordinates:
+
+$$
+\hat{\mathbf{m}}_2^\top E\,\hat{\mathbf{m}}_1 = 0, \qquad \hat{\mathbf{m}}_i = K_i^{-1}\mathbf{m}_i
+$$
+
+$E$ and $F$ are related by:
+
+$$
+E = K_2^\top F\,K_1
+$$
+
+$E$ has 5 degrees of freedom (3 for rotation, 2 for translation direction) and satisfies $EE^\top E = \frac{1}{2}\text{trace}(EE^\top)\,E$.
+
+## Triangulation and 3D reconstruction
+
+Given the projection matrices $P_1$, $P_2$ and a correspondence $\mathbf{m}_1 \leftrightarrow \mathbf{m}_2$, the 3D point $\mathbf{M}$ is recovered by **triangulation**:
+
+$$
+\mathbf{m}_1 \sim P_1\mathbf{M} \qquad \text{and} \qquad \mathbf{m}_2 \sim P_2\mathbf{M}
+$$
+
+This is a linear system in $\mathbf{M}$ solvable via SVD (DLT). Due to noise the two rays from $P_1$ and $P_2$ do not intersect exactly; the optimal $\mathbf{M}$ minimises the sum of squared reprojection errors.
+
+## Trifocal geometry
+
+With three views and projection matrices $P_1$, $P_2$, $P_3$, a point visible in views 1 and 2 can be located in view 3 using two fundamental matrices:
+
+$$
+\ell_{13} = F_{13}\,\mathbf{m}_1, \qquad \ell_{23} = F_{23}\,\mathbf{m}_2, \qquad \mathbf{m}_3 = \ell_{13} \times \ell_{23}
+$$
+
+The point in the third view is the **intersection of the two epipolar lines**, computed as the cross product of the two line vectors.
+
+<Tip>
+This makes 3D localisation from three views straightforward: click a point in views 1 and 2, compute the two epipolar lines in view 3, and intersect them to get the predicted location — without explicit triangulation.
+</Tip>
+
+## MATLAB code examples
+
+<CodeGroup>
+
+```matlab Epipolar geometry demo (CV02_EpipolarGeometry_Demo.m)
+% Two-camera epipolar geometry visualisation
+% Camera 1 (left): projection matrix A = K1 * P1 * H1
+H1 = [0 0 1 0; 1 0 0 -350; 0 1 0 0; 0 0 0 1];
+P1 = [700 0 0 0; 0 700 0 0; 0 0 1 0];
+K1 = [1 0 0; 0 1 350; 0 0 1];
+A  = K1 * P1 * H1;
+
+% Camera 2 (right): projection matrix B = K2 * P2 * H2
+H2 = [0 1 0 -350; 0 0 1 0; 1 0 0 0; 0 0 0 1];
+P2 = [700 0 0 0; 0 700 0 0; 0 0 1 0];
+K2 = [1 0 350; 0 1 0; 0 0 1];
+B  = K2 * P2 * H2;
+
+% Project a 3D point M and find its epipolar line in camera 2
+M  = [350, 500, 200, 1]';
+w1 = A*M;  u1 = w1(1)/w1(3);  v1 = w1(2)/w1(3);
+w2 = B*M;  u2 = w2(1)/w2(3);  v2 = w2(2)/w2(3);
+
+fprintf('Point in cam1: (%.1f, %.1f)\n', u1, v1);
+fprintf('Point in cam2: (%.1f, %.1f)\n', u2, v2);
+```
+
+```matlab Trifocal geometry (CV02_TrifocalGeometry.m)
+% Trifocal imaging using fundamental matrices
+% (c) Domingo Mery (2014)
+
+load projmatrices   % loads P1, P2, P3
+A = P1;  B = P2;  C = P3;
+
+% Compute fundamental matrices between views 1–3 and 2–3
+F13 = Bmv_fundamental(A, C);
+F23 = Bmv_fundamental(B, C);
+
+% Load the three views
+I1 = imread('../images/view_1.jpg');
+I2 = imread('../images/view_2.jpg');
+I3 = imread('../images/view_3.jpg');
+figure(1); imshow(I1); hold on
+figure(2); imshow(I2); hold on
+figure(3); imshow(I3); hold on
+
+[N, M] = size(I2);
+x = [1 M]';
+
+while true
+    % Click a point in view 1
+    figure(1);
+    p  = vl_click;  m1 = [p(1) p(2) 1]';
+    plot(p(1), p(2), 'g+')
+
+    % Draw epipolar line in view 3
+    figure(3)
+    ell_13 = F13 * m1;
+    a = ell_13(1); b = ell_13(2); c = ell_13(3);
+    y = -(a*x + c) / b;
+    plot(x, y)
+
+    % Click the corresponding point in view 2
+    figure(2);
+    p  = vl_click;  m2 = [p(1) p(2) 1]';
+    plot(p(1), p(2), 'g+')
+
+    % Draw second epipolar line in view 3
+    figure(3)
+    ell_23 = F23 * m2;
+    a = ell_23(1); b = ell_23(2); c = ell_23(3);
+    y = -(a*x + c) / b;
+    plot(x, y)
+
+    % Locate the point in view 3 as intersection of the two epipolar lines
+    m3 = cross(ell_13, ell_23);
+    x3 = m3(1)/m3(3);  y3 = m3(2)/m3(3);
+    plot(x3, y3, 'ro')
+end
+```
+
+</CodeGroup>
+
+## Python resources
+
+<CardGroup cols={2}>
+  <Card
+    title="Epipolar geometry (Colab)"
+    icon="python"
+    href="https://colab.research.google.com/drive/1q7bruJ-XaXKnmIoDuPF1AjEBmlq4XC67"
+  >
+    Interactive notebook: fundamental matrix estimation, epipolar line visualisation, and stereo matching.
+  </Card>
+  <Card
+    title="3D reconstruction (Colab)"
+    icon="cube"
+    href="https://colab.research.google.com/drive/1YF6EUdH8PhAaPfmGfvBZ6HMKTQUcvBlg"
+  >
+    Reconstruct 3D point clouds from stereo image pairs using triangulation.
+  </Card>
+  <Card
+    title="Trifocal geometry (Colab)"
+    icon="layers"
+    href="https://colab.research.google.com/drive/1T8FIaD3EJwBBM9dwdAaPTDIsRVKeK6De"
+  >
+    Transfer points across three views using the trifocal tensor and fundamental matrices.
+  </Card>
+</CardGroup>
+
+## Video lectures
+
+<CardGroup cols={2}>
+  <Card
+    title="Lecture: Epipolar geometry (2021)"
+    icon="youtube"
+    href="https://youtu.be/TSgDqprBfbk"
+  >
+    Recorded class on the epipolar constraint, fundamental matrix, and the 8-point algorithm.
+  </Card>
+  <Card
+    title="Lecture: Trifocal geometry and multiple views (2021)"
+    icon="youtube"
+    href="https://youtu.be/2tVptJDCDc8"
+  >
+    Recorded class on trifocal geometry, multi-view applications, and 3D reconstruction.
+  </Card>
+</CardGroup>
+
+## Concepts at a glance
+
+<AccordionGroup>
+  <Accordion title="What is the difference between F and E?">
+    The **fundamental matrix** $F$ works with pixel coordinates and does not require knowledge of the camera intrinsics. The **essential matrix** $E$ works with normalised (metric) image coordinates and embeds the intrinsics — it has only 5 DOF versus 7 for $F$. If $K_1$ and $K_2$ are known, use $E$; otherwise use $F$.
+  </Accordion>
+  <Accordion title="Why does F have rank 2?">
+    The epipolar constraint $\mathbf{m}_2^\top F\,\mathbf{m}_1 = 0$ must hold for all points on the epipole — the epipoles are in the left and right null spaces of $F$. A rank-2 matrix has a non-trivial null space, so $F\,\mathbf{e}_1 = \mathbf{0}$ and $F^\top\,\mathbf{e}_2 = \mathbf{0}$.
+  </Accordion>
+  <Accordion title="How accurate is triangulation?">
+    Accuracy depends on the baseline (distance between cameras) and the image noise. A wider baseline gives better depth resolution but increases the chance of occlusion. Noise in the correspondences translates directly into 3D error; the depth error grows as $Z^2 / (f \cdot b)$ where $b$ is the baseline.
+  </Accordion>
+  <Accordion title="What is the trifocal tensor?">
+    The trifocal tensor generalises the fundamental matrix to three views. It is a $3\times 3\times 3$ array that encodes all point and line transfer relationships across three views simultaneously. For point transfer using pairs of fundamental matrices (as in the MATLAB example above) the full tensor is not needed, but for line transfer and other constraints it provides a more complete model.
+  </Accordion>
+</AccordionGroup>

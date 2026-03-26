@@ -1,0 +1,214 @@
+---
+title: "Fairness and Bias in AI"
+description: Understanding and mitigating algorithmic bias in computer vision systems
+---
+
+A computer vision system that achieves 95% accuracy overall can still systematically fail for specific demographic groups. Aggregate performance metrics conceal distributional harms. This page covers how bias enters machine learning systems, how fairness is defined and measured, and what can be done about it.
+
+## What is bias in machine learning?
+
+Bias in ML systems is not a single phenomenon — it arises at multiple stages of the pipeline and from different causes.
+
+### Sampling bias
+
+Training data does not represent the population the model will be deployed on. Classic examples:
+
+- Face datasets collected from internet images over-represent young, light-skinned, Western faces
+- Medical imaging datasets collected at academic hospitals do not reflect rural or low-income populations
+- Activity recognition datasets built from YouTube videos skew toward activities common in wealthy countries
+
+A model trained on biased data learns biased representations. It performs well on the over-represented groups and poorly on under-represented ones — not because the model is "broken", but because it is doing exactly what it was trained to do.
+
+### Labeling bias
+
+Human annotators bring their own biases to the labeling process. When asked to label images for attributes like "professional appearance" or "aggressive expression", annotators' judgments are shaped by cultural context, personal experience, and social stereotypes. These biases are encoded into the training labels and then learned by the model.
+
+### Model bias
+
+Architectural and training choices can introduce or amplify bias independent of the data. Regularization techniques, loss functions, and optimization strategies that improve average performance often do so at the cost of performance on minority subgroups — a phenomenon sometimes called the accuracy-fairness tradeoff.
+
+<Note>
+Bias in AI systems is rarely the result of malicious intent. It typically emerges from well-intentioned decisions made without sufficient attention to distributional effects. This does not reduce the harm — it just changes the diagnosis and the remedy.
+</Note>
+
+## Fairness definitions
+
+There is no single universally agreed definition of fairness. Different formal definitions capture different moral intuitions, and they are often mathematically incompatible — you cannot satisfy all of them simultaneously.
+
+<AccordionGroup>
+  <Accordion title="Demographic parity">
+    A classifier satisfies demographic parity if it produces positive predictions at equal rates across demographic groups.
+
+    Formally, if `A` is a sensitive attribute (e.g., race or gender) and `Ŷ` is the model's prediction:
+
+    ```text
+    P(Ŷ = 1 | A = 0) = P(Ŷ = 1 | A = 1)
+    ```
+
+    **Intuition:** Each group should be selected at the same rate — for a job screening tool, demographic parity means the same fraction of applicants from each group advances.
+
+    **Limitation:** Demographic parity ignores whether the base rates differ across groups. If the true positive rate is genuinely different between groups (e.g., one group is more qualified), enforcing demographic parity requires accepting different error rates.
+  </Accordion>
+
+  <Accordion title="Equalized odds">
+    A classifier satisfies equalized odds if both the true positive rate and the false positive rate are equal across groups.
+
+    Formally:
+
+    ```text
+    P(Ŷ = 1 | A = 0, Y = y) = P(Ŷ = 1 | A = 1, Y = y)  for y ∈ {0, 1}
+    ```
+
+    **Intuition:** Among people who actually qualify (Y = 1), each group should be identified at the same rate. Among people who do not qualify (Y = 0), each group should be incorrectly selected at the same rate.
+
+    **Use case:** Equalized odds is appropriate when you want to ensure that group membership does not affect the probability of a correct classification, conditional on ground truth.
+
+    **Limitation:** Equalized odds and calibration are generally incompatible when base rates differ across groups (Chouldechova, 2017).
+  </Accordion>
+
+  <Accordion title="Individual fairness">
+    Individual fairness requires that similar individuals be treated similarly. A classifier is individually fair if:
+
+    ```text
+    d(x, x') small → d(f(x), f(x')) small
+    ```
+
+    where `d` is a task-specific similarity metric and `f` is the model's output.
+
+    **Intuition:** Two people who are alike in all relevant ways should receive similar predictions, regardless of their demographic group membership.
+
+    **Limitation:** Defining the appropriate similarity metric for a given task is non-trivial and requires domain expertise. Individual fairness is also difficult to verify at scale.
+  </Accordion>
+
+  <Accordion title="Calibration">
+    A classifier is calibrated for a group if its predicted probabilities match the true frequency of outcomes within that group.
+
+    Formally, for predicted probability `s`:
+
+    ```text
+    P(Y = 1 | S = s, A = a) = s  for all s, a
+    ```
+
+    **Intuition:** When a model predicts 70% likelihood of recidivism for individuals in group A, approximately 70% of those individuals should actually re-offend. If the model is calibrated differently for group A vs. group B, it is providing systematically misleading probability estimates for one group.
+
+    **Limitation:** Calibration is compatible with large differences in false positive and false negative rates across groups when base rates differ.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+The impossibility results in algorithmic fairness (Chouldechova 2017, Kleinberg et al. 2016) show that several common fairness criteria cannot be simultaneously satisfied when base rates differ across groups. This is not a limitation of current algorithms — it is a mathematical fact. Choosing a fairness criterion is a normative decision that requires engaging with the specific context and the values of the communities affected.
+</Note>
+
+## Bias in facial recognition: case studies
+
+Facial recognition provides some of the most studied examples of algorithmic bias in computer vision.
+
+**The Gender Shades study (Buolamwini & Gebru, 2018)** benchmarked commercial face analysis APIs from IBM, Microsoft, and Face++ on a dataset balanced across gender and skin tone. Error rates for classifying gender ranged from under 1% for lighter-skinned males to over 34% for darker-skinned females — a gap of more than 34 percentage points within the same system.
+
+**Facial recognition in law enforcement** has been documented producing false matches that led to wrongful arrests. In documented cases, all involved individuals were Black men. Several major cities have subsequently banned or restricted police use of facial recognition for this reason.
+
+**Age and gender inference** systems trained on self-reported social media data inherit the biases of self-reporting: who uses which platforms, how people present themselves online, and which images are publicly accessible all affect the composition of training data.
+
+The facial ethics lecture (linked below) examines these case studies in detail and discusses the systemic factors that produced them.
+
+## How to measure bias
+
+### Disparate impact
+
+Disparate impact measures the ratio of positive prediction rates between the least-favored and most-favored groups:
+
+```text
+Disparate Impact = P(Ŷ = 1 | A = unprivileged) / P(Ŷ = 1 | A = privileged)
+```
+
+The 80% rule from US employment law holds that a selection rate below 80% of the highest group's rate constitutes evidence of disparate impact. A ratio of 1.0 corresponds to demographic parity.
+
+### Equal opportunity difference
+
+Equal opportunity difference measures the gap in true positive rates between groups:
+
+```text
+EOD = TPR(unprivileged) - TPR(privileged)
+```
+
+A value of 0 indicates equal true positive rates (equal opportunity). Negative values indicate that the unprivileged group has a lower true positive rate — it is correctly identified less often.
+
+### Tools for bias auditing
+
+- **AI Fairness 360 (IBM):** A comprehensive Python toolkit for bias detection and mitigation across the ML pipeline
+- **Fairlearn (Microsoft):** Focused on fairness assessment and mitigation for classification and regression
+- **What-If Tool (Google):** Visual inspection of model behavior across subgroups
+
+## Mitigation strategies
+
+### Data augmentation
+
+Collect additional data for under-represented groups or augment existing data to improve representation. Targeted data collection — deliberately recruiting participants from demographics that are poorly represented in existing datasets — can improve model performance and reduce disparities at the source.
+
+### Re-weighting
+
+Assign higher loss weights to examples from under-represented groups during training. This encourages the model to minimize errors on minority groups even when they constitute a small fraction of the training data.
+
+### Adversarial debiasing
+
+Train an adversarial network alongside the main classifier. The adversary attempts to predict sensitive attributes from the classifier's internal representations; the classifier is penalized when the adversary succeeds. This encourages the model to learn representations that are uninformative about group membership.
+
+### Post-processing
+
+Adjust decision thresholds per demographic group to equalize a chosen fairness metric. This is applicable when the model is fixed and cannot be retrained, but requires access to group labels at inference time.
+
+<Note>
+No mitigation strategy is universally effective. The right approach depends on which fairness criterion you are targeting, whether group labels are available at training and inference time, and what constraints exist on the model and data pipeline. Mitigation also typically involves tradeoffs — improving fairness on one metric can reduce it on another, or reduce overall accuracy.
+</Note>
+
+## References and further reading
+
+<CardGroup cols={2}>
+  <Card
+    title="Fairness and Machine Learning (book)"
+    icon="book"
+    href="https://fairmlbook.org/pdf/fairmlbook.pdf"
+  >
+    Barocas, Hardt, and Narayanan. A rigorous introduction to fairness in ML, covering statistical definitions, impossibility results, and case studies. Free PDF.
+  </Card>
+  <Card
+    title="Tutorial on Fairness in ML"
+    icon="graduation-cap"
+    href="https://towardsdatascience.com/a-tutorial-on-fairness-in-machine-learning-3ff8ba1040cb"
+  >
+    Accessible introduction to fairness metrics with code examples. Good starting point before the Barocas et al. book.
+  </Card>
+</CardGroup>
+
+## Lecture videos
+
+<CardGroup cols={2}>
+  <Card
+    title="Fairness, part 1 — Moritz Hardt"
+    icon="play"
+    href="https://youtu.be/Igq_S_7IfOU"
+  >
+    MLSS 2020. Formal definitions of fairness, the impossibility theorems, and their implications for ML practice.
+  </Card>
+  <Card
+    title="Fairness, part 2 — Moritz Hardt"
+    icon="play"
+    href="https://youtu.be/9oNVFQ9llPc"
+  >
+    MLSS 2020. Continued treatment of fairness, covering mitigation methods and open problems.
+  </Card>
+  <Card
+    title="Bias y Fairness (class lecture, 2021)"
+    icon="play"
+    href="https://youtu.be/sNGriIvCtoY"
+  >
+    Recorded class lecture covering bias sources, fairness definitions, and measurement methods in the context of computer vision.
+  </Card>
+  <Card
+    title="Ethics in facial recognition (class lecture, 2021)"
+    icon="play"
+    href="https://youtu.be/IAVd_Dp1m2M"
+  >
+    Case studies in facial ethics: accuracy disparities, misuse in law enforcement, and the policy landscape around facial recognition.
+  </Card>
+</CardGroup>

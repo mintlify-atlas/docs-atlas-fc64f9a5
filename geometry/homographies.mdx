@@ -1,0 +1,162 @@
+---
+title: "Homographies"
+description: "Planar homographies and their applications in geometric rectification and image mosaics."
+---
+
+A **homography** is a $3\times 3$ projective transformation that maps points on one plane to points on another plane. Homographies arise naturally whenever a camera views a planar surface, making them indispensable for image rectification, panoramic mosaics, and augmented reality.
+
+## Definition
+
+Given two planes $\pi_1$ and $\pi_2$, a homography $H$ maps a point $\mathbf{m}_1$ on $\pi_1$ to its corresponding point $\mathbf{m}_2$ on $\pi_2$:
+
+$$
+\mathbf{m}_2 \sim H\,\mathbf{m}_1, \qquad H \in \mathbb{R}^{3\times 3}, \quad \det(H) \neq 0
+$$
+
+$H$ is defined **up to scale** (8 degrees of freedom). It encodes the full projective relationship between the two planes: straight lines map to straight lines, but parallel lines and distances in general do not.
+
+### Physical interpretations
+
+- Two images of the **same planar surface** are related by a homography.
+- Two images taken by a camera undergoing **pure rotation** (no translation) are related by a homography.
+- A **fronto-parallel rectification** maps a tilted planar surface to a canonical view.
+
+## Estimating a homography from correspondences
+
+Each point correspondence $\mathbf{m}_1^{(i)} \leftrightarrow \mathbf{m}_2^{(i)}$ gives 2 linear equations in the 9 entries of $H$ (after eliminating the scale). With 4 or more correspondences the system is:
+
+$$
+A\,\mathbf{h} = \mathbf{0}, \qquad \mathbf{h} = \text{vec}(H)
+$$
+
+The **Direct Linear Transform (DLT)** solves for $\mathbf{h}$ as the right singular vector of $A$ corresponding to its smallest singular value (SVD).
+
+<Note>
+Normalise input coordinates before running DLT: translate centroid to origin and scale so the mean distance to the origin is $\sqrt{2}$. Denormalise $H$ afterwards.
+</Note>
+
+## RANSAC for robust estimation
+
+In practice, SIFT/ORB feature matching produces many **outlier correspondences** (mismatches). Applying DLT directly to all matches gives a poor homography. **RANSAC** solves this:
+
+<Steps>
+  <Step title="Sample 4 correspondences">
+    Randomly draw 4 point pairs — the minimum needed to determine $H$ uniquely.
+  </Step>
+  <Step title="Estimate H with DLT">
+    Compute the candidate homography from the 4 sampled pairs.
+  </Step>
+  <Step title="Count inliers">
+    For each remaining correspondence compute the **symmetric transfer error**:
+    $$d(\mathbf{m}_2,\, H\mathbf{m}_1)^2 + d(\mathbf{m}_1,\, H^{-1}\mathbf{m}_2)^2 < \epsilon^2$$
+    Count how many pairs satisfy this threshold.
+  </Step>
+  <Step title="Keep best and refit">
+    After $N$ iterations, refit DLT using all inliers of the best hypothesis.
+  </Step>
+</Steps>
+
+## Applications
+
+### Image rectification
+
+Given 4 known world points on a planar surface and their image projections, the homography $H$ warps the image so the plane appears fronto-parallel — useful for reading text on a tilted book, correcting perspective distortion in a photo of a sign, or "unrolling" a clock face.
+
+### Panoramic mosaics
+
+When a camera rotates about its optical centre, consecutive frames are related by a homography. SIFT keypoints provide dense correspondences across frames; RANSAC filters mismatches; and the estimated homographies are composed to stitch the frames into a seamless panorama.
+
+## MATLAB code example
+
+```matlab
+% Homography estimation with SIFT matching and RANSAC
+% (CV02_HomografiaRANSAC.m)
+
+% Load and preprocess images
+I1 = rgb2gray(imread('../images/image1.jpg'));
+I1 = imresize(I1, 0.3);
+I1 = Bim_lin(I1);
+figure(6); imshow(I1,[]); title('Left image')
+
+I2 = rgb2gray(imread('../images/image2.jpg'));
+I2 = imresize(I2, 0.3);
+I2 = Bim_lin(I2);
+figure(7); imshow(I2,[]); title('Right image')
+
+% Compute SIFT correspondences between the two images
+[f1n, ~, f2n, ~, scores] = Bmv_matchSIFT(I1, I2, 1, 1);
+
+% Keep only high-confidence matches
+ii = scores < 3000;
+f1 = f1n(:, ii);
+f2 = f2n(:, ii);
+
+% Convert to homogeneous coordinates
+n  = size(f1, 2);
+m1 = [f1([2 1], :); ones(1, n)];
+m2 = [f2([2 1], :); ones(1, n)];
+
+% Estimate homography with RANSAC
+H = Bmv_homographyRANSAC(m1, m2);
+
+% Warp image 2 into the frame of image 1
+I2s = Bmv_projective2D(I2, H, size(I1), 1);
+figure(4); imshow(I2s,[]); title('Transformed image (Right to Left)')
+
+% Blend the two images
+I3 = (double(I2s) + double(I1)) / 2;
+figure(5); imshow(I3,[]); title('Mosaic')
+```
+
+## Python resources
+
+<CardGroup cols={2}>
+  <Card
+    title="Homographies example (Colab)"
+    icon="python"
+    href="https://colab.research.google.com/drive/10D7Q7r11MuWL2-fNRt2lSqCpSVkvytin"
+  >
+    Interactive notebook: compute and apply homographies using DLT and RANSAC in Python.
+  </Card>
+  <Card
+    title="E02 — Clock face rectification"
+    icon="graduation-cap"
+    href="https://colab.research.google.com/drive/1w0Q0Rki1S4F9sYcBnmGhW-et7FEBJBLF"
+  >
+    Practical exercise: use a homography to rectify a tilted clock face to a frontal view.
+  </Card>
+  <Card
+    title="Panoramic mosaics with SIFT (Colab)"
+    icon="images"
+    href="https://colab.research.google.com/drive/1LCOOdZDg5KN10ZBVcnyw1Xt_QUoIcCGs"
+  >
+    Build panoramic mosaics by chaining homographies estimated from SIFT feature matches.
+  </Card>
+</CardGroup>
+
+## Video lecture
+
+<Card
+  title="Lecture: Homographies and geometric rectification (2021)"
+  icon="youtube"
+  href="https://youtu.be/_6ps8YMsWc8"
+>
+  Recorded class covering homography estimation, RANSAC, and applications to rectification and mosaics.
+</Card>
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="How many point correspondences are needed?">
+    A homography has 8 degrees of freedom (9 entries up to scale), so **4 point correspondences** are sufficient for an exact solution (if noise-free). For a least-squares estimate over more points, use DLT with all inlier correspondences.
+  </Accordion>
+  <Accordion title="What is the symmetric transfer error?">
+    The symmetric transfer error measures how well $H$ maps points in both directions: it sums the squared distance of $H\mathbf{m}_1$ from $\mathbf{m}_2$ and of $H^{-1}\mathbf{m}_2$ from $\mathbf{m}_1$. This is more robust than a one-sided error when both images have noise.
+  </Accordion>
+  <Accordion title="When does a homography NOT exist between two views?">
+    A homography relates two views only when the scene is planar OR the camera translates without any rotation between frames. If the scene is 3D (non-planar) and the camera translates, the correct model is the fundamental matrix (see Multiple View Geometry).
+  </Accordion>
+  <Accordion title="How many RANSAC iterations are needed?">
+    The required number of iterations is $N = \log(1-p) / \log(1-(1-\epsilon)^s)$, where $p$ is the desired success probability (e.g., 0.99), $\epsilon$ is the outlier fraction, and $s=4$ is the minimal sample size. For 50 % outliers and $p=0.99$, about 1177 iterations are needed.
+  </Accordion>
+</AccordionGroup>

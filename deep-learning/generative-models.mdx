@@ -1,0 +1,159 @@
+---
+title: "Generative Models: GANs & Diffusion"
+description: Generative adversarial networks and diffusion-based image synthesis
+---
+
+Generative models learn the underlying data distribution and can synthesize new, realistic samples. The two dominant paradigms in computer vision are **Generative Adversarial Networks (GANs)** and **Diffusion Models**.
+
+## GAN fundamentals
+
+A GAN consists of two networks trained in opposition:
+
+- **Generator** $G$: maps random noise $\mathbf{z} \sim p_z$ to a synthetic image $G(\mathbf{z})$.
+- **Discriminator** $D$: classifies inputs as real (from the dataset) or fake (from $G$).
+
+### Training objective (minimax game)
+
+$$\min_G \max_D \; \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}}[\log D(\mathbf{x})] + \mathbb{E}_{\mathbf{z} \sim p_z}[\log(1 - D(G(\mathbf{z})))]$$
+
+At the Nash equilibrium, $G$ produces samples indistinguishable from real data and $D$ outputs $\frac{1}{2}$ everywhere.
+
+### GAN training dynamics
+
+<Steps>
+  <Step title="Train the discriminator">
+    Sample a minibatch of real images and a minibatch of generated images. Update $D$ to maximize the log-likelihood of correctly classifying both.
+  </Step>
+  <Step title="Train the generator">
+    Sample new noise vectors. Update $G$ to fool $D$ — maximize $\log D(G(\mathbf{z}))$ (non-saturating variant).
+  </Step>
+  <Step title="Repeat">
+    Alternate $D$ and $G$ updates for many iterations. Monitor FID (Fréchet Inception Distance) to measure generation quality.
+  </Step>
+</Steps>
+
+## Basic GAN in PyTorch
+
+```python
+import torch
+import torch.nn as nn
+
+latent_dim = 100
+img_dim    = 784  # 28×28 flattened
+
+# Generator
+generator = nn.Sequential(
+    nn.Linear(latent_dim, 256),
+    nn.LeakyReLU(0.2),
+    nn.Linear(256, 512),
+    nn.LeakyReLU(0.2),
+    nn.Linear(512, img_dim),
+    nn.Tanh()          # output in [-1, 1]
+)
+
+# Discriminator
+discriminator = nn.Sequential(
+    nn.Linear(img_dim, 512),
+    nn.LeakyReLU(0.2),
+    nn.Dropout(0.3),
+    nn.Linear(512, 256),
+    nn.LeakyReLU(0.2),
+    nn.Dropout(0.3),
+    nn.Linear(256, 1),
+    nn.Sigmoid()       # probability of being real
+)
+
+criterion = nn.BCELoss()
+opt_G = torch.optim.Adam(generator.parameters(),     lr=2e-4, betas=(0.5, 0.999))
+opt_D = torch.optim.Adam(discriminator.parameters(), lr=2e-4, betas=(0.5, 0.999))
+
+def train_step(real_imgs):
+    batch_size = real_imgs.size(0)
+    real_labels = torch.ones(batch_size, 1)
+    fake_labels = torch.zeros(batch_size, 1)
+
+    # --- Train discriminator ---
+    z         = torch.randn(batch_size, latent_dim)
+    fake_imgs = generator(z).detach()
+    loss_D    = criterion(discriminator(real_imgs), real_labels) + \
+                criterion(discriminator(fake_imgs), fake_labels)
+    opt_D.zero_grad(); loss_D.backward(); opt_D.step()
+
+    # --- Train generator ---
+    z         = torch.randn(batch_size, latent_dim)
+    fake_imgs = generator(z)
+    loss_G    = criterion(discriminator(fake_imgs), real_labels)  # fool D
+    opt_G.zero_grad(); loss_G.backward(); opt_G.step()
+
+    return loss_D.item(), loss_G.item()
+```
+
+## GAN variants
+
+<AccordionGroup>
+  <Accordion title="DCGAN (Deep Convolutional GAN)">
+    Replaces linear layers with transposed convolutions (generator) and strided convolutions (discriminator). Uses batch normalization throughout. DCGAN produces sharper images and trains more stably than the original GAN.
+
+    Key architectural guidelines:
+    - No pooling layers — use strided convolutions for downsampling.
+    - Batch norm in both $G$ and $D$ (except the output of $G$ and input of $D$).
+    - ReLU activations in $G$; LeakyReLU in $D$.
+  </Accordion>
+  <Accordion title="Conditional GAN (cGAN)">
+    Conditions both $G$ and $D$ on a class label $y$ (or any auxiliary information). The generator produces images of a specific class: $G(\mathbf{z}, y)$. Useful for class-conditional image synthesis and data augmentation.
+  </Accordion>
+  <Accordion title="Pix2Pix and CycleGAN">
+    Image-to-image translation GANs. Pix2Pix requires paired training images (input→output). CycleGAN learns the translation without paired data using a cycle-consistency loss.
+  </Accordion>
+</AccordionGroup>
+
+## Stable Diffusion and diffusion models
+
+Diffusion models have surpassed GANs in image quality and diversity. They operate by learning to **reverse a gradual noising process**.
+
+### The diffusion process
+
+**Forward process**: add Gaussian noise over $T$ timesteps until the image is pure noise:
+
+$$q(\mathbf{x}_t | \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t;\, \sqrt{1-\beta_t}\,\mathbf{x}_{t-1},\, \beta_t \mathbf{I})$$
+
+**Reverse process**: a neural network $\epsilon_\theta$ learns to predict the noise added at each step, enabling denoising:
+
+$$\mathcal{L}_{\text{DDPM}} = \mathbb{E}_{t, \mathbf{x}_0, \epsilon}\left[\|\epsilon - \epsilon_\theta(\mathbf{x}_t, t)\|^2\right]$$
+
+### Latent Diffusion (Stable Diffusion)
+
+Running diffusion in pixel space is computationally expensive. **Latent Diffusion Models (LDM)** compress images to a low-dimensional latent space using a pretrained VAE, then run diffusion there:
+
+1. Encode: $\mathbf{z} = \mathcal{E}(\mathbf{x})$
+2. Diffuse/denoise in latent space: $\mathbf{z}_0 \leftarrow$ LDM
+3. Decode: $\hat{\mathbf{x}} = \mathcal{D}(\mathbf{z}_0)$
+
+Text conditioning is provided via a CLIP text encoder, enabling **text-to-image generation**.
+
+## Applications
+
+| Application | Method | Notes |
+|---|---|---|
+| Synthetic data augmentation | Conditional GAN / diffusion | Generate rare or minority-class examples |
+| Style transfer | CycleGAN, neural style | Transform image appearance |
+| Super-resolution | SRGAN, ESRGAN | Upsample low-resolution images |
+| Inpainting | LaMa, diffusion | Fill masked regions |
+| Text-to-image | Stable Diffusion, DALL-E | Generate from text prompts |
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card title="Exercise E09: Image Generation with GAN" icon="flask" href="https://colab.research.google.com/drive/1MFV1VG_6P9eDOH7zG67A2kCxdeXZHCxB">
+    Hands-on exercise: train a GAN to generate images from a dataset.
+  </Card>
+  <Card title="VisionColab: GAN Examples" icon="github" href="https://github.com/domingomery/visioncolab#-generative-adversarial-network-gan">
+    Collection of GAN examples from the course repository.
+  </Card>
+  <Card title="Diffusion Models Blog" icon="book" href="https://www.superannotate.com/blog/diffusion-models">
+    Accessible overview of diffusion models, DDPM, and latent diffusion.
+  </Card>
+  <Card title="Video: UNet, GAN & Anomaly Detection" icon="play" href="https://youtu.be/5Y9UprUtlfg">
+    Recorded lecture covering GANs alongside UNet and anomaly detection.
+  </Card>
+</CardGroup>

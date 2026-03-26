@@ -1,122 +1,80 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Visión por Computador",
+  "theme": "palm",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#0765fb",
+    "light": "#7aacfa",
+    "dark": "#fcf7f4"
   },
-  "favicon": "/favicon.svg",
-  "navigation": {
-    "tabs": [
-      {
-        "tab": "Guides",
-        "groups": [
-          {
-            "group": "Getting started",
-            "pages": [
-              "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Customization",
-            "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API reference",
-        "groups": [
-          {
-            "group": "API documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
-            ]
-          }
-        ]
-      }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
+  "favicon": "https://media.brand.dev/c89f753b-7550-48fb-812b-c489ec9b060a.png",
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "https://media.brand.dev/e6b20a83-f030-44e1-b6fc-cd66c9dd3be2.png",
+    "dark": "https://media.brand.dev/e6b20a83-f030-44e1-b6fc-cd66c9dd3be2.png"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
     "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "type": "github",
+      "href": "https://github.com/domingomery/vision"
     }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/domingomery/vision"
     }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Course",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "course-overview",
+              "bibliography"
+            ]
+          },
+          {
+            "group": "Computational Geometry",
+            "pages": [
+              "geometry/homogeneous-coordinates",
+              "geometry/transformations",
+              "geometry/camera-calibration",
+              "geometry/homographies",
+              "geometry/multiple-view-geometry"
+            ]
+          },
+          {
+            "group": "Deep Learning",
+            "pages": [
+              "deep-learning/introduction",
+              "deep-learning/image-classification-cnn",
+              "deep-learning/object-detection-yolo",
+              "deep-learning/facial-analysis",
+              "deep-learning/segmentation-unet",
+              "deep-learning/generative-models",
+              "deep-learning/transformers"
+            ]
+          },
+          {
+            "group": "Ethics & AI",
+            "pages": [
+              "ethics/introduction",
+              "ethics/fairness-bias",
+              "ethics/explainability"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/exercises",
+              "resources/exam-preparation"
+            ]
+          }
+        ]
+      }
+    ]
   }
 }

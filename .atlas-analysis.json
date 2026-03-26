@@ -1,0 +1,84 @@
+{
+  "projectType": "ai-ml",
+  "projectName": "Visión por Computador",
+  "projectDescription": "A university-level Computer Vision course (taught at PUC by Domingo Mery) covering computational geometry, deep learning architectures, and AI ethics with MATLAB and Python examples.",
+  "theme": "palm",
+  "primaryColor": "#0765fb",
+  "lightColor": "#7aacfa",
+  "darkColor": "#fcf7f4",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Course",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "course-overview",
+              "bibliography"
+            ]
+          },
+          {
+            "group": "Computational Geometry",
+            "pages": [
+              "geometry/homogeneous-coordinates",
+              "geometry/transformations",
+              "geometry/camera-calibration",
+              "geometry/homographies",
+              "geometry/multiple-view-geometry"
+            ]
+          },
+          {
+            "group": "Deep Learning",
+            "pages": [
+              "deep-learning/introduction",
+              "deep-learning/image-classification-cnn",
+              "deep-learning/object-detection-yolo",
+              "deep-learning/facial-analysis",
+              "deep-learning/segmentation-unet",
+              "deep-learning/generative-models",
+              "deep-learning/transformers"
+            ]
+          },
+          {
+            "group": "Ethics & AI",
+            "pages": [
+              "ethics/introduction",
+              "ethics/fairness-bias",
+              "ethics/explainability"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/exercises",
+              "resources/exam-preparation"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Computational geometry with homogeneous coordinates, 2D/3D transformations, and homographies",
+    "Camera calibration and parameter estimation (RANSAC, least squares, SVD)",
+    "Epipolar and trifocal geometry for multi-view 3D reconstruction",
+    "Deep learning with CNNs, YOLO object detection, and facial recognition",
+    "Generative models including GANs and Stable Diffusion",
+    "Vision Transformers (ViT) and CLIP for vision-language tasks",
+    "Image segmentation with UNet",
+    "AI ethics: fairness, bias, explainability, and adversarial attacks",
+    "Hands-on Python (Google Colab) and MATLAB examples for each topic",
+    "Recorded lecture videos from prior course editions (2021)"
+  ],
+  "publicApiSurface": [
+    "Cap00: Course overview and bibliography",
+    "Cap01: Introduction — definitions and history of computer vision",
+    "Cap02: Geometry — homogeneous coordinates, transformations 2D/3D, calibration, homographies, epipolar geometry, trifocal geometry",
+    "Cap03: Deep Learning — CNNs, YOLO, facial analysis, UNet segmentation, GANs, Transformers, Stable Diffusion, CLIP, anomaly detection",
+    "Cap04: Ethics — fairness, bias, explainability (MinPlus), federated/swarm learning, good practices",
+    "MATLAB examples: CV02_3DPyramid, CV02_Calibration, CV02_EpiDemo_3D, CV02_TrifocalGeometry, CV02_SIFT, CV02_HomografiaRANSAC, CV02_Trans2D",
+    "Python/Colab notebooks: CNN training, YOLO detection, facial analysis with AdaFace, UNet segmentation, GAN image generation, Transformers with HuggingFace"
+  ]
+}

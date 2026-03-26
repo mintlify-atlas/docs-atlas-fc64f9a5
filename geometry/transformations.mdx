@@ -1,0 +1,178 @@
+---
+title: "2D and 3D Transformations"
+description: "Euclidean, similarity, affine, and projective transformations in 2D and 3D, represented as homogeneous matrices."
+---
+
+Geometric transformations map points from one coordinate frame to another. Representing them as **homogeneous matrices** allows any chain of transformations to be composed by matrix multiplication, and makes the hierarchy of transformation groups explicit.
+
+## Hierarchy of 2D transformations
+
+Each class of 2D transformation preserves a strictly smaller set of geometric properties than the one below it.
+
+| Class | DOF | Preserved | Matrix form |
+|---|---|---|---|
+| Translation | 2 | Distances, angles | $\begin{pmatrix}I & \mathbf{t}\\ \mathbf{0}^\top & 1\end{pmatrix}$ |
+| Euclidean (rigid) | 3 | Distances, angles | $\begin{pmatrix}R & \mathbf{t}\\ \mathbf{0}^\top & 1\end{pmatrix}$ |
+| Similarity | 4 | Angles, ratios of lengths | $\begin{pmatrix}sR & \mathbf{t}\\ \mathbf{0}^\top & 1\end{pmatrix}$ |
+| Affine | 6 | Parallelism, area ratios | $\begin{pmatrix}A & \mathbf{t}\\ \mathbf{0}^\top & 1\end{pmatrix}$ |
+| Projective (homography) | 8 | Cross-ratio, collinearity | $\begin{pmatrix}\tilde{A} & \tilde{\mathbf{t}}\\ \mathbf{v}^\top & v\end{pmatrix}$ |
+
+### Translation
+
+$$
+\mathbf{m}' = T\,\mathbf{m}, \qquad T = \begin{pmatrix}1 & 0 & t_x\\ 0 & 1 & t_y\\ 0 & 0 & 1\end{pmatrix}
+$$
+
+### Rotation by angle $\theta$
+
+$$
+R(\theta) = \begin{pmatrix}\cos\theta & -\sin\theta \\ \sin\theta & \cos\theta\end{pmatrix}
+$$
+
+The full rigid-body matrix in homogeneous form:
+
+$$
+H_{\text{Eucl}} = \begin{pmatrix}\cos\theta & -\sin\theta & t_x\\ \sin\theta & \cos\theta & t_y\\ 0 & 0 & 1\end{pmatrix}
+$$
+
+### Affine transformation
+
+$$
+H_{\text{aff}} = \begin{pmatrix}a_{11} & a_{12} & t_x\\ a_{21} & a_{22} & t_y\\ 0 & 0 & 1\end{pmatrix}
+$$
+
+Parallel lines remain parallel under affine maps; angles and lengths in general do not.
+
+### Projective (homography)
+
+$$
+H = \begin{pmatrix}h_{11} & h_{12} & h_{13}\\ h_{21} & h_{22} & h_{23}\\ h_{31} & h_{32} & h_{33}\end{pmatrix}
+$$
+
+defined up to scale (8 degrees of freedom). Straight lines map to straight lines, but parallelism is not preserved.
+
+## 3D transformations
+
+In 3D the same hierarchy applies. A rigid-body transformation uses a $3\times3$ rotation matrix $R$ and a translation vector $\mathbf{t}\in\mathbb{R}^3$:
+
+$$
+\mathbf{M}' = \begin{pmatrix}R & \mathbf{t}\\ \mathbf{0}^\top & 1\end{pmatrix}\mathbf{M}
+$$
+
+### Rotation matrices and the Rodrigues formula
+
+Any 3D rotation can be parameterised by an axis $\hat{\mathbf{n}}$ (unit vector) and an angle $\theta$. The **Rodrigues rotation formula** gives:
+
+$$
+R = I\cos\theta + (1-\cos\theta)\hat{\mathbf{n}}\hat{\mathbf{n}}^\top + \sin\theta\,[\hat{\mathbf{n}}]_\times
+$$
+
+where $[\hat{\mathbf{n}}]_\times$ is the skew-symmetric cross-product matrix:
+
+$$
+[\mathbf{n}]_\times = \begin{pmatrix}0 & -n_z & n_y\\ n_z & 0 & -n_x\\ -n_y & n_x & 0\end{pmatrix}
+$$
+
+In MATLAB, the compact **Rodrigues vector** $\boldsymbol{\omega} = \theta\hat{\mathbf{n}}$ encodes both axis and angle in 3 numbers, and the conversion is available via `rodrig2R` / `R2rodrig`.
+
+## 3D-to-2D perspective projection
+
+The full **camera projection matrix** $P$ maps a 3D world point $\mathbf{M}$ to a 2D image point $\mathbf{m}$:
+
+$$
+\mathbf{m} \sim P\,\mathbf{M}, \qquad P = K\,[R\;|\;\mathbf{t}]
+$$
+
+where $K$ is the intrinsic matrix (see [Camera Calibration](/geometry/camera-calibration)):
+
+$$
+K = \begin{pmatrix}f_x & s & c_x\\ 0 & f_y & c_y\\ 0 & 0 & 1\end{pmatrix}
+$$
+
+## MATLAB examples
+
+<CodeGroup>
+
+```matlab 2D transformations (Trans2D)
+% Interactive 2D transformation demo using Balu Toolbox
+% 1. Go to the folder containing painting.png
+%    cd ../images
+% 2. Launch the GUI
+Bmv_guihomography
+% 3. Press Load and type 'painting.png'
+% 4. Use the GUI buttons to apply:
+%    - rotation, translation, similarity, affine, projective
+```
+
+```matlab 3D pyramid transformations (3DPyramid)
+% 3D representation of a Pyramid — apply rotation and translation
+% (c) Domingo Mery (2014)
+
+% Define 5 pyramid vertices in homogeneous coordinates
+p1 = [0 0 0 1]';
+p2 = [2 0 0 1]';
+p3 = [2 2 0 1]';
+p4 = [0 2 0 1]';
+p5 = [1 1 2 1]';  % apex
+P  = [p1 p2 p3 p4 p5];
+
+% Connectivity (draw edges between vertices)
+s = [1 2 5 1 4 5 3 2 3 4];
+M = P(:, s);
+
+% Translation t and Rodrigues rotation vector w
+t = [1 2 3]';  w = [0 0 0]';
+CV02_PlotMesh3D(M, t, w);
+
+% Rotate 90 degrees around x-axis
+t = [0 0 0]';  w = [pi/2 0 0]';
+CV02_PlotMesh3D(M, t, w);
+
+% Animate full rotation around each axis
+for wx = 0:pi/36:2*pi
+    w(1) = wx;
+    CV02_PlotMesh3D(M, t, w);
+    drawnow
+end
+```
+
+</CodeGroup>
+
+## Python examples
+
+<CardGroup cols={2}>
+  <Card
+    title="3D transformations (Colab)"
+    icon="python"
+    href="https://colab.research.google.com/drive/1ntbUB7Dc3is7fxu3Z6at46DdOeK-nJO3"
+  >
+    Notebook covering rotation matrices, the Rodrigues formula, and 3D-to-2D perspective projection in Python.
+  </Card>
+</CardGroup>
+
+## Video lecture
+
+<Card
+  title="Lecture: 2D transformations and homographies (2021)"
+  icon="youtube"
+  href="https://youtu.be/bFTwmL_oHGE"
+>
+  Recorded class covering the full hierarchy of 2D transformations and their homogeneous matrix representations.
+</Card>
+
+## Key properties at a glance
+
+<AccordionGroup>
+  <Accordion title="Composing transformations">
+    Because every transformation is a matrix, composing two transformations is just matrix multiplication: $H_{\text{total}} = H_2 H_1$. The order matters — matrix multiplication is not commutative in general.
+  </Accordion>
+  <Accordion title="Inverting a rigid-body transformation">
+    For a rigid-body matrix $(R,\mathbf{t})$ the inverse is $(R^\top, -R^\top\mathbf{t})$, since rotation matrices are orthogonal ($R^{-1} = R^\top$). This is much cheaper than a general matrix inversion.
+  </Accordion>
+  <Accordion title="Degrees of freedom count">
+    Translation: 2 (tx, ty). Euclidean: 3 (+angle). Similarity: 4 (+scale). Affine: 6 (full 2×2 matrix + translation). Projective: 8 (3×3 matrix up to scale). In 3D, rigid-body has 6 DOF (3 rotation + 3 translation).
+  </Accordion>
+  <Accordion title="What is preserved under each transformation?">
+    Euclidean: distances and angles. Similarity: angles and length ratios. Affine: parallelism, ratios of collinear lengths, area ratios. Projective: cross-ratio of four collinear points, and collinearity.
+  </Accordion>
+</AccordionGroup>

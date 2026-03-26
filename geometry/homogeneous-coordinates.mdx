@@ -1,0 +1,142 @@
+---
+title: "Homogeneous Coordinates"
+description: "Points, lines, and planes in projective space — the foundational language of computer vision geometry."
+---
+
+Homogeneous coordinates extend ordinary Euclidean geometry into **projective space**, making it possible to represent points, lines, and planes with simple vectors and to express all geometric transformations — including perspective projection — as matrix multiplications.
+
+## Points and lines in 2D
+
+A 2D Euclidean point $(x, y)$ is embedded in projective space as a **3-vector**:
+
+$$
+\mathbf{m} = \begin{pmatrix} x \\ y \\ 1 \end{pmatrix} \quad \text{or more generally} \quad \mathbf{m} = \begin{pmatrix} wx \\ wy \\ w \end{pmatrix}, \quad w \neq 0
+$$
+
+The scale factor $w$ is arbitrary — the vectors $(wx,\, wy,\, w)$ and $(x,\, y,\, 1)$ represent the **same point**. When $w = 0$ the vector represents a **point at infinity** (ideal point) along the direction $(x, y)$.
+
+A 2D line $ax + by + c = 0$ is likewise a 3-vector:
+
+$$
+\boldsymbol{\ell} = \begin{pmatrix} a \\ b \\ c \end{pmatrix}
+$$
+
+### Key operations
+
+**Point on a line** — point $\mathbf{m}$ lies on line $\boldsymbol{\ell}$ if and only if:
+
+$$
+\boldsymbol{\ell}^\top \mathbf{m} = ax + by + c = 0
+$$
+
+**Intersection of two lines** — the intersection point of $\boldsymbol{\ell}_1$ and $\boldsymbol{\ell}_2$ is:
+
+$$
+\mathbf{m} = \boldsymbol{\ell}_1 \times \boldsymbol{\ell}_2
+$$
+
+**Line through two points** — the line joining $\mathbf{m}_1$ and $\mathbf{m}_2$ is:
+
+$$
+\boldsymbol{\ell} = \mathbf{m}_1 \times \mathbf{m}_2
+$$
+
+where $\times$ denotes the **cross product**. This elegant duality means point–line incidence is handled by a single cross product in either direction.
+
+## Duality of points and lines
+
+In projective 2D space there is a perfect **duality** between points and lines: any theorem about points and lines remains valid when the two notions are swapped. Both are represented by 3-vectors; the roles of "join" and "intersection" exchange.
+
+| Operation | Formula |
+|---|---|
+| Line through $\mathbf{m}_1$, $\mathbf{m}_2$ | $\boldsymbol{\ell} = \mathbf{m}_1 \times \mathbf{m}_2$ |
+| Intersection of $\boldsymbol{\ell}_1$, $\boldsymbol{\ell}_2$ | $\mathbf{m} = \boldsymbol{\ell}_1 \times \boldsymbol{\ell}_2$ |
+| Point on line test | $\boldsymbol{\ell}^\top \mathbf{m} = 0$ |
+| Parallel lines meet at | $\boldsymbol{\ell}_1 \times \boldsymbol{\ell}_2$ (point at infinity) |
+
+## Extension to 3D
+
+In 3D projective space a point $\mathbf{M} = (X, Y, Z)$ becomes a **4-vector**:
+
+$$
+\mathbf{M} = \begin{pmatrix} X \\ Y \\ Z \\ 1 \end{pmatrix}
+$$
+
+A plane $aX + bY + cZ + d = 0$ is also a 4-vector $\boldsymbol{\pi} = (a, b, c, d)^\top$, and the incidence condition is:
+
+$$
+\boldsymbol{\pi}^\top \mathbf{M} = 0
+$$
+
+**Intersection of three planes** is the 3D analogue of intersecting two lines — solved as a $3 \times 4$ linear system or via cross product of the plane normals.
+
+<Note>
+A line in 3D is **not** simply a 4-vector; it requires either two points, two planes (their intersection), or the Plücker representation (a $4\times 4$ skew-symmetric matrix).
+</Note>
+
+## MATLAB example — points and lines
+
+The following snippet illustrates the basic operations with homogeneous coordinates in MATLAB:
+
+```matlab
+% Define two 2D points in homogeneous coordinates
+m1 = [1; 2; 1];   % point (1, 2)
+m2 = [4; 0; 1];   % point (4, 0)
+
+% Line through the two points
+ell = cross(m1, m2);
+fprintf('Line: %dx + %dy + %d = 0\n', ell(1), ell(2), ell(3));
+
+% Check incidence
+fprintf('m1 on line: %d\n', abs(dot(ell, m1)) < 1e-9);
+fprintf('m2 on line: %d\n', abs(dot(ell, m2)) < 1e-9);
+
+% Define a second line and find intersection
+ell2 = [1; 1; -3];   % x + y = 3
+m_int = cross(ell, ell2);
+m_int = m_int / m_int(3);  % normalise
+fprintf('Intersection: (%.2f, %.2f)\n', m_int(1), m_int(2));
+```
+
+## Python examples
+
+<CardGroup cols={2}>
+  <Card
+    title="Points and lines (Colab)"
+    icon="python"
+    href="https://colab.research.google.com/drive/146tZRDi1aMUcAEUHICZm9u5n5tkYe8P2"
+  >
+    Interactive notebook covering homogeneous point and line operations in Python.
+  </Card>
+  <Card
+    title="E01 — Where does John Lennon look?"
+    icon="graduation-cap"
+    href="https://colab.research.google.com/drive/1knJgA6L62IgbMOsqjhbtHxLOsNHICnJn"
+  >
+    Practical exercise: use line intersections to determine gaze direction from a photograph.
+  </Card>
+</CardGroup>
+
+## Video lecture
+
+<Card
+  title="Lecture: Homogeneous coordinates, lines, and points (2021)"
+  icon="youtube"
+  href="https://youtu.be/IS8asEOXbzs"
+>
+  Recorded class covering the full theory of homogeneous coordinates in 2D and 3D.
+</Card>
+
+## Summary
+
+<AccordionGroup>
+  <Accordion title="Why use homogeneous coordinates?">
+    Homogeneous coordinates unify all geometric operations — including perspective projection, which maps 3D points to 2D image points — into simple matrix multiplications. Points at infinity are handled naturally, eliminating the need for special cases in intersection and transformation algorithms.
+  </Accordion>
+  <Accordion title="How do you convert back to Euclidean coordinates?">
+    Divide all components by the last coordinate: $(wx, wy, w) \mapsto (x, y)$. If the last coordinate is zero the point is at infinity and has no Euclidean representation.
+  </Accordion>
+  <Accordion title="What is the cross product rule for lines and intersections?">
+    Both the line through two points and the intersection of two lines use the **cross product** of the two 3-vectors. This works because the cross product $\mathbf{a} \times \mathbf{b}$ produces a vector orthogonal to both, and orthogonality in projective space encodes incidence ($\boldsymbol{\ell}^\top \mathbf{m} = 0$).
+  </Accordion>
+</AccordionGroup>

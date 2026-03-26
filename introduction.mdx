@@ -1,0 +1,69 @@
+---
+title: "Introduction to Computer Vision"
+description: "An overview of the field of computer vision — what it is, where it comes from, and how this course approaches it."
+---
+
+Computer vision is the discipline concerned with enabling machines to interpret and understand visual information from the world. It draws on mathematics, physics, and machine learning to solve problems that humans perform effortlessly: recognizing objects, estimating depth, reading text, tracking motion, and reconstructing three-dimensional scenes from photographs.
+
+This course — *Visión por Computador* (IEE3714 / IIC3724) at Pontificia Universidad Católica de Chile — is taught by Professor Domingo Mery. It covers the theory and practice of computer vision from geometric foundations through modern deep learning, and concludes with a frank discussion of ethics and the societal impact of AI.
+
+## What is computer vision?
+
+At its core, computer vision asks: given one or more images, what can a machine infer about the physical world that produced them?
+
+That deceptively simple question leads to a rich set of sub-problems:
+
+- **Recognition** — identifying objects, faces, scenes, and text in images.
+- **Reconstruction** — recovering the 3D structure of a scene from 2D projections.
+- **Detection and tracking** — locating objects across space and time.
+- **Segmentation** — partitioning an image into semantically meaningful regions.
+- **Generation** — synthesizing new, realistic images (GANs, diffusion models).
+
+Applications span medicine (X-ray analysis, surgical robotics), autonomous vehicles, industrial inspection, augmented reality, biometrics, and scientific imaging.
+
+## A brief history of the field
+
+Computer vision has evolved over roughly six decades:
+
+| Era | Key developments |
+|-----|------------------|
+| 1960s–70s | Early edge detection, block-world scene understanding, early neural networks |
+| 1980s | Scale-space theory, optical flow, stereo vision, Marr's computational framework |
+| 1990s | Statistical shape models, SIFT-like features, structure from motion |
+| 2000s | Face detection (Viola–Jones), SIFT, large-scale datasets |
+| 2012–present | Deep learning revolution — AlexNet, YOLO, ResNet, GANs, Transformers, diffusion |
+
+The course history lectures (Classes 2–4) trace this arc in detail, from Renaissance perspective machines through the ImageNet era and beyond. The Khan Academy notes on [vanishing points](https://www.khanacademy.org/humanities/renaissance-reformation/early-renaissance1/beginners-renaissance-florence/v/how-one-point-linear-perspective-works) and the [perspective machine video](https://www.youtube.com/watch?v=8s1LzIrWbE8) provide accessible visual context for why geometry was the starting point of the field.
+
+## Course philosophy and approach
+
+The course is built on three convictions:
+
+1. **Geometry first.** Understanding how cameras project the 3D world into 2D images — homogeneous coordinates, homographies, epipolar geometry — is prerequisite knowledge for everything else.
+2. **Hands-on learning.** Every theoretical topic is paired with a Google Colab notebook. You will implement calibration, RANSAC, CNNs, YOLO, UNet, GANs, and Transformers, not just read about them.
+3. **Responsible practice.** The final chapter of the course addresses bias, fairness, explainability, and data-protection law, because deploying vision systems in the real world carries real ethical weight.
+
+Primary tools are **Python** (via Google Colab) and **MATLAB**. No prior computer vision experience is assumed, but familiarity with linear algebra, calculus, and basic Python is expected.
+
+<Note>
+All lecture slides, Colab notebooks, recorded classes, and practice exercises are available in the course GitHub repository at [github.com/domingomery/vision](https://github.com/domingomery/vision).
+</Note>
+
+## Continue exploring
+
+<CardGroup cols={2}>
+  <Card
+    title="Course Overview"
+    icon="calendar"
+    href="/course-overview"
+  >
+    Full 28-class schedule, chapter structure, grading, and exam resources.
+  </Card>
+  <Card
+    title="Bibliography & Resources"
+    icon="books"
+    href="/bibliography"
+  >
+    Core textbooks, supplementary videos, and reference materials.
+  </Card>
+</CardGroup>

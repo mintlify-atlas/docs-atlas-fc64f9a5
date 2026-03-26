@@ -1,0 +1,137 @@
+---
+title: "Course Overview"
+description: "Schedule, chapter structure, grading, and exam resources for Visión por Computador (IEE3714 / IIC3724)."
+---
+
+This page covers the full structure of the course: what is taught, when, and how you are assessed.
+
+<Info>
+The course runs August–November 2025 at Pontificia Universidad Católica de Chile. There are 28 classes, meeting on Tuesdays and Thursdays. Professor: Domingo Mery.
+</Info>
+
+## Learning progression
+
+The course is organized into five chapters. Each chapter builds on the previous one, moving from foundations to application to responsibility.
+
+<Steps>
+  <Step title="Cap00 — General lines" icon="presentation-screen">
+    Course presentation, bibliography, and exam preparation. Establishes expectations and provides the reference materials used throughout the semester.
+  </Step>
+  <Step title="Cap01 — Introduction" icon="eye">
+    Definitions of computer vision, motivating applications, and a two-part history of the field from early perspective geometry to the deep learning era.
+  </Step>
+  <Step title="Cap02 — Computational geometry" icon="vector-square">
+    The mathematical backbone of the course. Homogeneous coordinates, 2D and 3D transformations, homographies, camera calibration, RANSAC, epipolar geometry, trifocal geometry, and 3D reconstruction.
+  </Step>
+  <Step title="Cap03 — Deep learning" icon="brain">
+    Convolutional neural networks, object detection (YOLO), facial analysis, semantic segmentation (UNet), generative adversarial networks (GANs), anomaly detection, CLIP, Transformers, Visual Transformers (ViT), and diffusion models.
+  </Step>
+  <Step title="Cap04 — Ethics & AI" icon="scale-balanced">
+    The good, the bad, and the ugly of AI. Facial recognition ethics, fairness, explainability (MinPlus / saliency maps), federated learning, data-protection law, and responsible deployment practices.
+  </Step>
+</Steps>
+
+## Full 28-class schedule
+
+<AccordionGroup>
+  <Accordion title="Cap00 — General lines (Classes 1 and 28)" icon="presentation-screen">
+    | Class | Date | Topics |
+    |-------|------|--------|
+    | 01 | Thu 07-Aug-2025 | Course presentation, bibliography overview |
+    | 28 | Thu 27-Nov-2025 | Exam support — past exam questions (2023, 2024) and solutions |
+
+    **Exam support resources (Class 28)**
+    - [2023 Exam questions (PDF)](https://github.com/domingomery/vision/blob/master/clases/Cap00_Lineas_Generales/examenes/2023-Desarrollo_Preguntas.pdf)
+    - [2023 Exam solutions (PDF)](https://github.com/domingomery/vision/blob/master/clases/Cap00_Lineas_Generales/examenes/2023-Desarrollo_Solucion.pdf)
+    - [2024 Exam questions (PDF)](https://github.com/domingomery/vision/blob/master/clases/Cap00_Lineas_Generales/examenes/2024-Desarrollo_Preguntas.pdf)
+    - [2024 Exam solutions (PDF)](https://github.com/domingomery/vision/blob/master/clases/Cap00_Lineas_Generales/examenes/2024-Desarrollo_Solucion.pdf)
+    - [NotebookLM del Curso](https://notebooklm.google.com/notebook/1ed383dd-2fca-4ed3-ab24-e1301d613522)
+  </Accordion>
+
+  <Accordion title="Cap01 — Introduction (Classes 2–4)" icon="eye">
+    | Class | Date | Topics |
+    |-------|------|--------|
+    | 02 | Tue 12-Aug-2025 | Definitions (CV01); History part 1 |
+    | 03 | Thu 14-Aug-2025 | History (cont.); vanishing points and perspective |
+    | 04 | Tue 19-Aug-2025 | History part 2 |
+
+    History lectures cover the arc from Renaissance perspective machines through the deep learning revolution.
+  </Accordion>
+
+  <Accordion title="Cap02 — Computational geometry (Classes 2–11)" icon="vector-square">
+    | Class | Date | Topics |
+    |-------|------|--------|
+    | 02 | Tue 12-Aug-2025 | Homogeneous coordinates, points, lines, planes |
+    | 03 | Thu 14-Aug-2025 | 2D–2D transformations, homographies; in-class exercise E01 (John Lennon) |
+    | 04 | Tue 19-Aug-2025 | Homographies (cont.); 3D transformations |
+    | 05 | Thu 21-Aug-2025 | 3D–3D and 3D–2D transformations; in-class exercise E02 (clock rectification) |
+    | 06 | Tue 26-Aug-2025 | Parameter estimation, calibration, RANSAC |
+    | 07 | Thu 28-Aug-2025 | Mosaics; SIFT features; camera calibration |
+    | 08 | Tue 02-Sep-2025 | 3D reconstruction; calibration (Python and MATLAB) |
+    | 09 | Thu 04-Sep-2025 | Epipolar geometry; in-class exercise E04 |
+    | 10 | Tue 09-Sep-2025 | Epipolar geometry (cont.); multiple-view X-ray applications |
+    | 11 | Thu 11-Sep-2025 | Trifocal geometry; chapter summary |
+
+    <Tip>
+    Practice exercises for this chapter — points/lines, transformations, and homographies — are available as PDFs in the course repository.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Cap03 — Deep learning (Classes 12–23 and 25)" icon="brain">
+    | Class | Date | Topics |
+    |-------|------|--------|
+    | 12 | Tue 23-Sep-2025 | Introduction to deep learning; CNNs |
+    | 13 | Tue 30-Sep-2025 | CNN training; in-class exercise E05 |
+    | 14 | Thu 02-Oct-2025 | Object detection — YOLO + tracking |
+    | 15 | Tue 07-Oct-2025 | YOLO (cont.); in-class exercise E06 (mask detection) |
+    | 16 | Thu 09-Oct-2025 | Facial analysis |
+    | 17 | Tue 14-Oct-2025 | Facial analysis — social; face recognition (AdaFace); in-class exercise E07 |
+    | 18 | Thu 23-Oct-2025 | Semantic segmentation — UNet; in-class exercise E08 |
+    | 19 | Tue 28-Oct-2025 | Generative adversarial networks (GANs); detection statistics |
+    | 20 | Thu 30-Oct-2025 | GAN in-class exercise E09; anomaly detection |
+    | 21 | Tue 04-Nov-2025 | CLIP |
+    | 22 | Thu 06-Nov-2025 | Transformers from scratch |
+    | 23 | Tue 11-Nov-2025 | Visual Transformers (ViT); HuggingFace; in-class exercise E10 |
+    | 25 | Tue 18-Nov-2025 | Stable diffusion; diffusion models |
+
+    **Assignment T02** is released in Class 18 and covers deep learning project work.
+  </Accordion>
+
+  <Accordion title="Cap04 — Ethics & AI (Classes 24–27)" icon="scale-balanced">
+    | Class | Date | Topics |
+    |-------|------|--------|
+    | 24 | Thu 13-Nov-2025 | The good, the bad, and the ugly of AI; essay assignment T03 released |
+    | 25 | Tue 18-Nov-2025 | Ethical challenges in facial recognition |
+    | 26 | Thu 20-Nov-2025 | Federated / swarm learning; explainability; Chilean data-protection law (Ley 19628) |
+    | 27 | Tue 25-Nov-2025 | Bias and fairness; good practices; explainability with MinPlus; adversarial attacks; quiz E11 |
+
+    <Note>
+    The essay assignment T03 is described on Canvas. The quiz E11 in Class 27 is also submitted via Canvas.
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+## Grading and assignments
+
+The course has three main assignments plus quizzes:
+
+| Item | Description |
+|------|-------------|
+| **T01** | Assignment 1 — covers computational geometry (Cap02) |
+| **T02** | Assignment 2 — deep learning project (released Class 18, Cap03) |
+| **T03** | Essay — ethics and AI (released Class 24, Cap04) |
+| **E01–E11** | In-class exercises throughout the semester |
+| **Examen** | Final exam — past papers from 2023 and 2024 are available for practice |
+
+<Tip>
+Past exam questions and solutions from 2023 and 2024 are available in the course repository under `Cap00_Lineas_Generales/examenes/`. Class 28 is dedicated entirely to exam preparation.
+</Tip>
+
+## Tools and environment
+
+The course uses two primary computing environments:
+
+- **Python / Google Colab** — the primary tool for all exercises and assignments. Notebooks run in the browser with free GPU access.
+- **MATLAB** — used for selected geometry and calibration demonstrations.
+
+All Colab notebooks are linked from the class schedule in the [course GitHub repository](https://github.com/domingomery/vision).

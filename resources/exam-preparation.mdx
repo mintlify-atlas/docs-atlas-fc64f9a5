@@ -1,0 +1,165 @@
+---
+title: "Exam Preparation"
+description: "Past exam questions, solutions, and study resources for the Computer Vision course final exam."
+---
+
+The final exam for Visión por Computador is a written development exam (*examen de desarrollo*). It tests your ability to reason through problems rather than recall definitions — expect multi-step derivations, diagram interpretation, and short analytical arguments.
+
+The exam typically includes questions spanning three main areas: computational geometry, deep learning architectures, and ethics/fairness in AI. Below you will find past exams, a NotebookLM course assistant, and topic summaries to guide your review.
+
+## Exam format
+
+- **Type**: Written, open-ended development questions (no multiple choice)
+- **Coverage**: Chapters 2, 3, and 4 — geometry, deep learning, and ethics
+- **What is expected**: Show your work; partial credit is given for correct reasoning even if the final answer is wrong
+- **Mathematical tools**: You are expected to apply matrix operations, SVD decomposition, homogeneous coordinates, and loss function formulations
+
+## Past exams
+
+<CardGroup cols={2}>
+  <Card
+    title="Exam 2023 — Questions"
+    icon="file-lines"
+    href="https://github.com/domingomery/vision/blob/master/clases/Cap00_Lineas_Generales/examenes/2023-Desarrollo_Preguntas.pdf"
+  >
+    Development questions from the 2023 final exam. Use these to practice writing full solutions under time constraints.
+  </Card>
+  <Card
+    title="Exam 2023 — Solutions"
+    icon="circle-check"
+    href="https://github.com/domingomery/vision/blob/master/clases/Cap00_Lineas_Generales/examenes/2023-Desarrollo_Solucion.pdf"
+  >
+    Official solutions for the 2023 exam. Compare your reasoning against these after attempting the questions.
+  </Card>
+  <Card
+    title="Exam 2024 — Questions"
+    icon="file-lines"
+    href="https://github.com/domingomery/vision/blob/master/clases/Cap00_Lineas_Generales/examenes/2024-Desarrollo_Preguntas.pdf"
+  >
+    Development questions from the 2024 final exam. The 2024 paper includes more deep learning-focused questions.
+  </Card>
+  <Card
+    title="Exam 2024 — Solutions"
+    icon="circle-check"
+    href="https://github.com/domingomery/vision/blob/master/clases/Cap00_Lineas_Generales/examenes/2024-Desarrollo_Solucion.pdf"
+  >
+    Official solutions for the 2024 exam.
+  </Card>
+</CardGroup>
+
+## NotebookLM course assistant
+
+<Note>
+  The course has a dedicated [NotebookLM notebook](https://notebooklm.google.com/notebook/1ed383dd-2fca-4ed3-ab24-e1301d613522) loaded with the course materials. You can ask it questions about any topic covered in the course and it will answer using the actual source documents. This is a useful tool for checking your understanding of a concept or exploring connections between topics — but do not rely on it as a substitute for working through the past exams yourself.
+</Note>
+
+## Topic summaries
+
+Use these summaries to identify gaps in your preparation. Each accordion covers one chapter.
+
+<AccordionGroup>
+  <Accordion title="Chapter 2 — Computational geometry">
+    This chapter is the heaviest in terms of mathematical content and typically accounts for the largest share of exam questions.
+
+    **Homogeneous coordinates**
+    - Points and lines in 2D are represented as 3-vectors; planes and points in 3D as 4-vectors.
+    - The intersection of two lines `l` and `m` is the cross product `l × m`.
+    - The line through two points `p` and `q` is the cross product `p × q`.
+
+    **2D and 3D transformations**
+    - Know the hierarchy: Euclidean → similarity → affine → projective.
+    - Each transformation is represented as a matrix acting on homogeneous coordinates.
+    - Composition of transformations = multiplication of matrices.
+
+    **Homographies**
+    - A homography is a 3×3 invertible matrix **H** mapping one projective plane to another.
+    - Estimated from at least 4 point correspondences using the Direct Linear Transform (DLT).
+    - DLT reduces to solving a homogeneous linear system **Ah = 0**, where the solution is the singular vector of **A** corresponding to the smallest singular value (SVD).
+
+    **Camera calibration**
+    - The camera matrix **P = K[R|t]** encodes intrinsic (**K**) and extrinsic (**R**, **t**) parameters.
+    - Calibration recovers **K** from known 3D–2D point correspondences, again via SVD.
+    - Non-linear distortion parameters (radial, tangential) are estimated separately.
+    - RANSAC is used to robustly estimate geometric models in the presence of outliers.
+
+    **Epipolar geometry**
+    - Two cameras viewing the same scene share an epipolar constraint: `p'ᵀFp = 0`.
+    - The fundamental matrix **F** (3×3, rank 2) encodes the relative geometry of the two cameras.
+    - Estimated from 8 or more point correspondences using the 8-point algorithm and SVD.
+    - Epipolar lines let you reduce stereo matching from 2D search to 1D search.
+  </Accordion>
+
+  <Accordion title="Chapter 3 — Deep learning architectures">
+    This chapter covers the main neural network architectures used in computer vision today.
+
+    **Convolutional neural networks (CNNs)**
+    - Convolution layers learn local spatial filters; pooling layers downsample feature maps.
+    - Common architectures: LeNet, VGG, ResNet, EfficientNet.
+    - Training: forward pass → loss → backpropagation → gradient descent.
+    - Transfer learning: freeze pretrained weights, fine-tune the final layers on your dataset.
+
+    **Object detection — YOLO**
+    - YOLO divides the image into a grid and predicts bounding boxes + class probabilities per cell.
+    - Loss combines localization loss, confidence loss, and classification loss.
+    - Non-maximum suppression (NMS) removes duplicate detections.
+
+    **Facial analysis**
+    - Face detection, alignment, recognition, and attribute prediction are separate sub-tasks.
+    - Modern face recognition systems (e.g., AdaFace) use metric learning (cosine similarity) on embeddings.
+
+    **Segmentation — UNet**
+    - UNet uses an encoder–decoder architecture with skip connections.
+    - Skip connections preserve spatial detail that is lost during downsampling.
+    - Trained with pixel-wise cross-entropy or dice loss.
+
+    **Generative models — GANs**
+    - A GAN consists of a generator **G** and discriminator **D** trained adversarially.
+    - Training objective: **G** tries to fool **D**; **D** tries to distinguish real from fake.
+    - Common failure modes: mode collapse, training instability.
+
+    **Transformers and Vision Transformers (ViT)**
+    - Transformers use self-attention to model long-range dependencies without convolutions.
+    - ViT splits an image into fixed-size patches, embeds them as tokens, and passes them through a standard Transformer encoder.
+    - HuggingFace provides pretrained ViT models for rapid experimentation.
+  </Accordion>
+
+  <Accordion title="Chapter 4 — Ethics and fairness in AI">
+    The ethics chapter is examined through both the E11 quiz and development questions in the final exam.
+
+    **Key concepts**
+    - **Bias**: Systematic errors in model predictions that disadvantage certain groups. Sources include biased training data, biased labels, and biased evaluation metrics.
+    - **Fairness**: Multiple competing formal definitions (demographic parity, equalized odds, individual fairness). No single definition satisfies all desiderata simultaneously.
+    - **Explainability**: Methods such as saliency maps, LIME, and MinPlus reveal which image regions drive a model's prediction.
+    - **Adversarial attacks**: Small, imperceptible perturbations to input images can cause confident misclassification.
+    - **Federated / swarm learning**: Distributed training paradigms that avoid centralizing sensitive data.
+
+    **What to know for the exam**
+    - Be able to define and distinguish bias, fairness, and discrimination.
+    - Understand why fairness constraints can be in tension with accuracy.
+    - Explain what a saliency map shows and what its limitations are.
+    - Discuss at least one real-world case where a CV system caused harm due to bias.
+  </Accordion>
+
+  <Accordion title="Key mathematical tools">
+    Several mathematical tools appear across multiple chapters. Make sure you are comfortable with all of them.
+
+    **Homogeneous coordinates**
+    - Represent 2D points as `(x, y, 1)ᵀ` and 3D points as `(X, Y, Z, 1)ᵀ`.
+    - Enable transformations (including projections) to be expressed as matrix multiplications.
+
+    **Matrix decompositions**
+    - **SVD** (`A = UΣVᵀ`): Used throughout the course to solve homogeneous least-squares problems. The solution to `min ‖Ah‖` subject to `‖h‖ = 1` is the last column of **V**.
+    - **QR decomposition**: Used to extract the intrinsic matrix **K** from the camera matrix **P**.
+    - **Eigendecomposition**: Used in PCA and in analyzing transformation matrices.
+
+    **Least squares**
+    - Overdetermined system `Ax ≈ b`: solution is `x = (AᵀA)⁻¹Aᵀb`.
+    - Homogeneous system `Ax = 0`: solution via SVD (smallest singular value).
+    - Weighted and robust variants (RANSAC) handle outliers.
+
+    **Calculus for deep learning**
+    - Chain rule for backpropagation.
+    - Gradient of cross-entropy loss with softmax output.
+    - Role of learning rate, momentum, and batch normalization in convergence.
+  </Accordion>
+</AccordionGroup>

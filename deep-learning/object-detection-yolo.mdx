@@ -1,0 +1,160 @@
+---
+title: "Object Detection with YOLO"
+description: Real-time object detection, tracking, and anomaly detection
+---
+
+Object detection goes beyond image classification: the model must **locate** each object with a bounding box and **classify** it simultaneously. YOLO (You Only Look Once) is the dominant real-time detection framework, processing a full image in a single forward pass.
+
+## Detection vs. classification
+
+| Task | Output | Example |
+|---|---|---|
+| Classification | Single class label | "cat" |
+| Detection | Bounding boxes + class labels | `[(x,y,w,h, "cat"), (x,y,w,h, "dog")]` |
+| Segmentation | Pixel-wise mask | Per-pixel class assignment |
+
+## YOLO architecture overview
+
+YOLO divides the input image into an $S \times S$ grid. Each grid cell predicts $B$ bounding boxes and $C$ class probabilities simultaneously.
+
+### Bounding box prediction
+
+Each bounding box prediction consists of 5 values:
+
+$$[x, y, w, h, \text{confidence}]$$
+
+- $(x, y)$: center of the box relative to the grid cell.
+- $(w, h)$: width and height relative to the full image.
+- **Confidence**: $\Pr(\text{Object}) \times \text{IoU}^{\text{truth}}_{\text{pred}}$
+
+### Anchor boxes
+
+Modern YOLO versions use **anchor boxes** — predefined aspect ratios learned from the training data via k-means clustering. Each anchor handles objects of a specific size and shape.
+
+### Multi-scale detection
+
+YOLOv5 and later versions detect objects at three scales (large, medium, small feature map strides), allowing the network to handle objects of very different sizes in the same image.
+
+## Running YOLO inference
+
+```python
+# Using Ultralytics YOLOv8
+from ultralytics import YOLO
+
+# Load a pretrained model
+model = YOLO('yolov8n.pt')  # nano variant for speed
+
+# Run inference on an image
+results = model('image.jpg', conf=0.25, iou=0.45)
+
+# Inspect results
+for result in results:
+    boxes = result.boxes          # bounding box tensors
+    for box in boxes:
+        x1, y1, x2, y2 = box.xyxy[0]
+        conf  = box.conf[0].item()
+        cls   = int(box.cls[0].item())
+        label = model.names[cls]
+        print(f"{label}: {conf:.2f}  [{x1:.0f},{y1:.0f},{x2:.0f},{y2:.0f}]")
+```
+
+## Object tracking
+
+YOLO can be combined with tracking algorithms (DeepSORT, ByteTrack) to assign persistent IDs across video frames:
+
+```python
+# Tracking with YOLOv8
+results = model.track('video.mp4', persist=True, tracker='bytetrack.yaml')
+
+for result in results:
+    if result.boxes.id is not None:
+        track_ids = result.boxes.id.int().cpu().tolist()
+        boxes     = result.boxes.xyxy.cpu().tolist()
+```
+
+## Evaluation metrics
+
+### Intersection over Union (IoU)
+
+$$\text{IoU} = \frac{|\text{Prediction} \cap \text{Ground Truth}|}{|\text{Prediction} \cup \text{Ground Truth}|}$$
+
+A prediction is considered correct when $\text{IoU} \geq 0.5$ (PASCAL VOC) or averaged over $[0.5, 0.95]$ (COCO).
+
+### Precision and Recall
+
+$$\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}} \qquad \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}$$
+
+### Mean Average Precision (mAP)
+
+mAP is the primary benchmark for detection models. It averages the **area under the precision-recall curve** (AP) across all object categories:
+
+$$\text{mAP} = \frac{1}{C} \sum_{c=1}^{C} \text{AP}_c$$
+
+## Anomaly detection
+
+Anomaly detection in computer vision identifies **out-of-distribution** samples — defective products, unusual events, or unseen object types.
+
+Common approaches:
+
+- **Reconstruction-based**: autoencoders trained on normal data; high reconstruction error signals anomalies.
+- **Feature distribution**: fit a Gaussian on embeddings from normal samples; Mahalanobis distance detects outliers.
+- **One-class classification**: models like PatchCore or PaDiM trained exclusively on normal images.
+
+<AccordionGroup>
+  <Accordion title="When to use anomaly detection vs. supervised detection">
+    Use anomaly detection when:
+    - Defect types are unknown or highly variable.
+    - You only have access to "normal" samples during training.
+    - The defect rate is extremely low (few labeled examples).
+
+    Use supervised YOLO-style detection when:
+    - Defect categories are well-defined and labeled data is available.
+    - You need bounding box localization with class labels.
+  </Accordion>
+</AccordionGroup>
+
+## CLIP for zero-shot detection
+
+CLIP (Contrastive Language-Image Pretraining) learns a joint embedding space for images and text. This enables **zero-shot** detection: describe an object in natural language and find it without any labeled images.
+
+```python
+import torch
+import clip
+from PIL import Image
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model, preprocess = clip.load("ViT-B/32", device=device)
+
+image = preprocess(Image.open("image.jpg")).unsqueeze(0).to(device)
+texts = clip.tokenize(["a person wearing a mask",
+                       "a person without a mask"]).to(device)
+
+with torch.no_grad():
+    image_features = model.encode_image(image)
+    text_features  = model.encode_text(texts)
+    logits, _      = model(image, texts)
+    probs          = logits.softmax(dim=-1).cpu().numpy()
+
+print(f"Mask: {probs[0][0]:.2%}  No mask: {probs[0][1]:.2%}")
+```
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card title="YOLO Example Notebook" icon="file" href="https://drive.google.com/file/d/19cCPvz_OcT9cKk0NUgb3PnFMFYYHuvlP/view">
+    Complete YOLO object detection example from the course.
+  </Card>
+  <Card title="Anomaly Detection Examples" icon="flask" href="https://colab.research.google.com/drive/14pSLbxh8ogFDCV2IjzQbVDMFXBb7aG4i">
+    Colab notebook with anomaly detection techniques applied to visual inspection.
+  </Card>
+  <Card title="CLIP Notebook" icon="file" href="https://drive.google.com/file/d/1gc58fR9cE1G1Uszu63P_9WnuHJx9-kKL">
+    CLIP zero-shot classification and retrieval examples.
+  </Card>
+  <Card title="Video: YOLO Lecture (2021)" icon="play" href="https://youtu.be/-VcyIt0p7bA">
+    Recorded lecture on YOLO object detection and tracking.
+  </Card>
+</CardGroup>
+
+<Note>
+Exercise E06 covers YOLO-based mask detection. The full exercise and solution notebooks are distributed via the course Canvas page. The [course repository](https://github.com/domingomery/vision/tree/master/clases/Cap03_DeepLearning) contains related data files and project templates.
+</Note>

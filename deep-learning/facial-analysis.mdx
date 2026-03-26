@@ -1,0 +1,123 @@
+---
+title: "Facial Analysis"
+description: Face detection, recognition, and social attribute analysis
+---
+
+Facial analysis encompasses a family of computer vision tasks centered on the human face: detecting faces in images, verifying identity, and estimating social attributes like age, gender, and emotion. Modern deep learning pipelines perform all of these in a single end-to-end system.
+
+## Facial analysis tasks
+
+| Task | Description | Output |
+|---|---|---|
+| Detection | Locate faces in an image | Bounding boxes |
+| Alignment | Normalize face crop to canonical pose | Aligned face image |
+| Recognition | Match a face to a known identity | Identity or embedding |
+| Verification | Decide if two faces are the same person | Yes / No + confidence |
+| Attribute analysis | Estimate age, gender, emotion | Labels or continuous values |
+
+## Face recognition pipeline
+
+A robust face recognition system follows four stages:
+
+<Steps>
+  <Step title="Detection">
+    Detect all faces in the input image. Common detectors: MTCNN, RetinaFace, BlazeFace. Each returns a bounding box and facial landmark coordinates.
+  </Step>
+  <Step title="Alignment">
+    Use the five-point landmarks (two eyes, nose, two mouth corners) to apply a similarity transform, producing a standardized 112×112 crop. Alignment is critical — misaligned faces significantly hurt recognition accuracy.
+  </Step>
+  <Step title="Embedding">
+    Pass the aligned crop through a deep network (ResNet-50 or -100 backbone) to produce a compact feature vector, typically 512-dimensional. Similar faces produce embeddings close together in $\ell_2$ distance.
+  </Step>
+  <Step title="Matching">
+    Compare the query embedding against a gallery of known embeddings using cosine similarity or $\ell_2$ distance:
+
+    $$\text{similarity}(\mathbf{f}_1, \mathbf{f}_2) = \frac{\mathbf{f}_1 \cdot \mathbf{f}_2}{\|\mathbf{f}_1\| \|\mathbf{f}_2\|}$$
+
+    If the similarity exceeds a threshold $\tau$, the identities match.
+  </Step>
+</Steps>
+
+## Deep face recognition: ArcFace and AdaFace
+
+Classical softmax training does not enforce tight clustering of same-identity embeddings. **Margin-based loss functions** explicitly push the decision boundary closer to each class center.
+
+### ArcFace loss
+
+ArcFace adds an angular margin $m$ to the target class angle:
+
+$$\mathcal{L} = -\frac{1}{N} \sum_{i=1}^{N} \log \frac{e^{s \cos(\theta_{y_i} + m)}}{e^{s \cos(\theta_{y_i} + m)} + \sum_{j \neq y_i} e^{s \cos \theta_j}}$$
+
+where $s$ is a scaling factor and $\theta_{y_i}$ is the angle between the embedding and the target class weight vector.
+
+### AdaFace
+
+AdaFace introduces an **adaptive margin** that scales with image quality. Low-quality images (blurry, occluded) receive a smaller margin, preventing the loss from forcing incorrect gradients on hard-to-recognize samples.
+
+```python
+# Simplified AdaFace-based face recognition
+import torch
+import net  # AdaFace model definition
+from face_alignment import align  # alignment helper
+
+# Load pretrained AdaFace model
+model = net.build_model('ir_50')
+statedict = torch.load('adaface_ir50_ms1mv2.ckpt',
+                       map_location='cpu')['state_dict']
+model.load_state_dict(statedict)
+model.eval()
+
+def get_embedding(img_path):
+    """Return 512-d L2-normalized embedding for a face image."""
+    aligned = align.get_aligned_face(img_path)  # detect + align
+    tensor  = torch.tensor(aligned).permute(2,0,1).unsqueeze(0).float() / 255.0
+    with torch.no_grad():
+        emb, _ = model(tensor)
+    return torch.nn.functional.normalize(emb, p=2, dim=1)
+
+emb1 = get_embedding('person_a.jpg')
+emb2 = get_embedding('person_b.jpg')
+similarity = (emb1 * emb2).sum().item()
+print(f"Cosine similarity: {similarity:.4f}")
+```
+
+## Social attribute analysis
+
+Beyond identity, we can estimate **social attributes** from face crops:
+
+### Age estimation
+
+Age is typically framed as a regression or ordinal regression problem. The model predicts a continuous age value from the face embedding:
+
+$$\hat{a} = f_{\text{age}}(\mathbf{e})$$
+
+Mean absolute error (MAE) is the standard evaluation metric.
+
+### Gender classification
+
+Binary classification (male/female) on top of face embeddings. Modern models achieve >95% accuracy on benchmark datasets, though they can exhibit demographic bias — an important ethical consideration.
+
+### Emotion recognition
+
+Seven basic emotion categories (angry, disgust, fear, happy, neutral, sad, surprised) are predicted from face crops, often using lightweight CNNs fine-tuned on the AffectNet or RAF-DB datasets.
+
+<Note>
+Social attribute models carry significant ethical risks, including demographic bias and potential misuse. When applying these methods, consider fairness, consent, and the limitations of automated attribute inference.
+</Note>
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card title="AdaFace Basic Example" icon="flask" href="https://colab.research.google.com/drive/1gPxbtx0Ueqc3fSSNFGWhDULxDSajxrfZ">
+    Step-by-step Colab notebook for face recognition using AdaFace.
+  </Card>
+  <Card title="Exercise E07: Facial Analysis" icon="flask" href="https://colab.research.google.com/drive/1oDR4I237g4QoMt80x-Rv7pvcRJAa5jaz">
+    Hands-on exercise covering face detection, alignment, and recognition.
+  </Card>
+  <Card title="VisionColab: Facial Analysis" icon="github" href="https://github.com/domingomery/visioncolab#-facial-analysis">
+    Collection of facial analysis examples from the course repository.
+  </Card>
+  <Card title="Video: Facial Analysis Lecture (2021)" icon="play" href="https://youtu.be/GBeisP4GBz8">
+    Recorded lecture on facial analysis techniques and applications.
+  </Card>
+</CardGroup>
